@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "fastack"
+version = "0.1.0"
+description = "Fastack is a blah blah blah framework!!!"
+authors = ["aprilahijriyan <37798612+aprilahijriyan@users.noreply.github.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.6.2,<4.0.0"
+fastapi = "^0.70.1"
+typer = {extras = ["all"], version = "^0.4.0"}
+sqlmodel = {version = "^0.0.5", optional = true}
+aioredis = {version = "^2.0.0", optional = true}
+mongoengine = {version = "^0.23.1", optional = true}
+alembic = {version = "^1.7.5", optional = true}
+uvicorn = "^0.16.0"
+
+[tool.poetry.dev-dependencies]
+black = {version = "^21.12b0", allow-prereleases = true}
+pre-commit = "^2.16.0"
+
+[tool.poetry.extras]
+
+sql = ["sqlmodel", "alembic"]
+nosql = ["mongoengine"]
+redis = ["aioredis"]
+
+[tool.poetry.scripts]
+
+fastack = "fastack.cli:fastack"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
