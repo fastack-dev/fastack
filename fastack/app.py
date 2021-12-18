@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import Any
+from typing import Any, Callable, Union
 
 from fastapi import FastAPI
 from typer import Typer
@@ -27,8 +27,11 @@ class Fastack(FastAPI):
 
     def load_commands(self):
         for command in self.get_setting("COMMANDS", []):
-            command = import_attr(command)
-            self.cli.add_typer(command)
+            command: Union[Callable, Typer] = import_attr(command)
+            if isinstance(command, Typer):
+                self.cli.add_typer(command)
+            else:
+                self.cli.command(command.__name__)(command)
 
     def include_controller(self, controller: Controller, **kwds):
         router = controller.build(**kwds)
