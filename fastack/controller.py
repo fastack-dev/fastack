@@ -1,3 +1,4 @@
+from types import MethodType
 from typing import Any, Sequence, Type, Union
 
 from fastapi import APIRouter
@@ -32,16 +33,19 @@ class Controller:
     def build(self, **kwds) -> APIRouter:
         kwds.setdefault("prefix", self.get_url_prefix())
         router = APIRouter(**kwds)
-        for method in dir(self):
-            method = method.upper()
-            if method not in HTTP_METHODS:
-                method = self.get_http_method(method)
+        for method_name in dir(self):
+            func = getattr(self, method_name)
+            if method_name.startswith("_") or not isinstance(func, MethodType):
+                continue
 
-            if method:
-                path = self.get_path(method)
-                func = getattr(self, method)
-                params = getattr(func, "__route_params__") or {}
-                params.setdefault("methods", [method])
+            http_method = method_name.upper()
+            if http_method not in HTTP_METHODS:
+                http_method = self.get_http_method(method_name)
+
+            if http_method:
+                path = self.get_path(method_name)
+                params = getattr(func, "__route_params__", None) or {}
+                params.setdefault("methods", [http_method])
                 router.add_api_route(path, func, **params)
 
         return router

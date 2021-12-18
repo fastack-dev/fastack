@@ -1,13 +1,13 @@
 from enum import Enum
-from typing import Dict, Union
+from typing import Dict
 
 
 class APIEndpoint(str, Enum):
-    LIST = "LIST"
-    RETRIEVE = "RETRIEVE"
-    CREATE = "CREATE"
-    UPDATE = "UPDATE"
-    DESTROY = "DESTROY"
+    LIST = "list"
+    RETRIEVE = "retrieve"
+    CREATE = "create"
+    UPDATE = "update"
+    DESTROY = "destroy"
 
 
 HTTP_METHODS = [
@@ -22,17 +22,17 @@ HTTP_METHODS = [
     "TRACE",
 ]
 
-MAPPING_ENDPOINTS: Dict[Union[APIEndpoint, str], str] = {
-    APIEndpoint.LIST: "",
-    APIEndpoint.CREATE: "",
-    APIEndpoint.RETRIEVE: "/{id}",
-    APIEndpoint.UPDATE: "/{id}",
-    APIEndpoint.DESTROY: "/{id}",
+MAPPING_ENDPOINTS: Dict[str, str] = {
+    APIEndpoint.LIST.value: "",
+    APIEndpoint.CREATE.value: "",
+    APIEndpoint.RETRIEVE.value: "/{id}",
+    APIEndpoint.UPDATE.value: "/{id}",
+    APIEndpoint.DESTROY.value: "/{id}",
 }
-METHOD_ENDPOINTS: Dict[Union[APIEndpoint, str], str] = {
-    APIEndpoint.LIST: "GET",
-    APIEndpoint.CREATE: "POST",
-    APIEndpoint.RETRIEVE: "GET",
-    APIEndpoint.UPDATE: "PUT",
-    APIEndpoint.DESTROY: "DELETE",
+METHOD_ENDPOINTS: Dict[str, str] = {
+    APIEndpoint.LIST.value: "GET",
+    APIEndpoint.CREATE.value: "POST",
+    APIEndpoint.RETRIEVE.value: "GET",
+    APIEndpoint.UPDATE.value: "PUT",
+    APIEndpoint.DESTROY.value: "DELETE",
 }
