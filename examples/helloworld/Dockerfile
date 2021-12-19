@@ -6,10 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 COPY ./app /space/app
-COPY ./Pipfile /space/app
-COPY ./Pipfile.lock /space/app
+COPY ./Pipfile /space
+COPY ./Pipfile.lock /space
 
-WORKDIR /space/app
+WORKDIR /space
 
 RUN pip install pipenv
 RUN pipenv install --system --deploy --ignore-pipfile
