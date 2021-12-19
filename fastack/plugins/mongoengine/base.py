@@ -47,6 +47,7 @@ class Model(Document):
 
     def serialize(self) -> dict:
         return {
+            "id": str(self.pk),
             "date_created": self.date_created,
             "date_updated": self.date_updated,
         }
