@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastack"
-version = "0.3.1"
+version = "0.3.2"
 description = "Fastack is a blah blah blah framework!!!"
 authors = ["aprilahijriyan <37798612+aprilahijriyan@users.noreply.github.com>"]
 license = "MIT"

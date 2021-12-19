@@ -1,6 +1,5 @@
 import os
 import subprocess
-import sys
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 import click
@@ -77,7 +76,6 @@ class Command(Typer):
 
     def load_app(self) -> Union[Fastack, None]:
         os.chdir(os.getcwd())
-        sys.path.insert(0, os.getcwd())
         try:
             src = os.environ.get("FASTACK_APP", "app.main.app")
             app: Fastack = import_attr(src)
