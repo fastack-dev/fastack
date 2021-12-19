@@ -2,6 +2,7 @@ from types import MethodType
 from typing import Any, Sequence, Type, Union
 
 from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
@@ -78,7 +79,7 @@ class Controller:
             if hasattr(data, "serialize"):
                 data = data.serialize()
 
-            content["data"] = data
+            content["data"] = jsonable_encoder(data)
 
         return JSONResponse(content, status, headers=headers)
 
@@ -99,6 +100,8 @@ class ListController(Controller):
         for o in data:
             if hasattr(o, "serialize"):
                 o = o.serialize()
+
+            o = jsonable_encoder(o)
             results.append(o)
 
         return results
