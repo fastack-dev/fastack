@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "790270b9d4198ae4cb89b36562b95b258549d0e44068c9e4487f03415839a042"
+            "sha256": "84350d1ebdeeebe8dcf45ce8d6587d21183116410111908049301a33c568bd89"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -72,10 +72,11 @@
         },
         "fastack": {
             "hashes": [
-                "sha256:75ce1c889e48a81878301fe5e7900750a226744ad760941bec4ee0cb6c0cca89"
+                "sha256:52071710837a5774cdec5d3ff4f0fba99a7db71dd3c105ec972327a905f4aa31",
+                "sha256:5caf66a18fc678a503b4bf30c8048e766dee0058d5b817fd797341d332ceab7b"
             ],
-            "path": "./../../dist/fastack-0.2.1-py3-none-any.whl",
-            "version": "==0.2.1"
+            "index": "pypi",
+            "version": "==0.4.1"
         },
         "fastapi": {
             "hashes": [
