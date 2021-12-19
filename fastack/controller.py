@@ -69,13 +69,17 @@ class Controller:
     def json(
         self,
         detail: str,
-        data: Union[dict, list] = None,
+        data: Union[dict, list, object] = None,
         status: int = 200,
         headers: dict = None,
     ) -> JSONResponse:
         content = {"detail": detail}
         if data:
+            if hasattr(data, "serialize"):
+                data = data.serialize()
+
             content["data"] = data
+
         return JSONResponse(content, status, headers=headers)
 
 
@@ -89,8 +93,15 @@ class ListController(Controller):
 
     def paginate(self, data: Sequence, page: int = 1, page_size: int = 10) -> Sequence:
         if self.pagination_class:
-            return self.pagination_class(page, page_size).paginate(data)
-        return data
+            data = self.pagination_class(page, page_size).paginate(data)
+
+        results = []
+        for o in data:
+            if hasattr(o, "serialize"):
+                o = o.serialize()
+            results.append(o)
+
+        return results
 
     def get_paginated_response(
         self,
@@ -132,4 +143,14 @@ class ReadOnlyController(RetrieveController, ListController):
 
 
 class CreateUpdateController(CreateController, UpdateController):
+    pass
+
+
+class CRUDController(
+    RetrieveController,
+    CreateController,
+    ListController,
+    UpdateController,
+    DestroyController,
+):
     pass
