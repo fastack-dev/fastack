@@ -16,6 +16,9 @@ class Model(Document):
 
     def update(self, **kwargs):
         kwargs["date_updated"] = datetime.utcnow()
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
         return super().update(**kwargs)
 
     def save(
