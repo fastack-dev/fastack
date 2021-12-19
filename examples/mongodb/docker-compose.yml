@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  app:
+    restart: always
+    build: .
+    ports:
+      - "6700:6700"
+    environment:
+      APP_ENV: production
+
+  db:
+    restart: always
+    image: bitnami/mongodb
+    environment:
+      MONGODB_ROOT_USER: root
+      MONGODB_ROOT_PASSWORD: password
+      MONGODB_USERNAME: fastack_user
+      MONGODB_PASSWORD: fastack_pass
+      MONGODB_DATABASE: fastack_db
+    volumes:
+      - db-data:/bitnami/mongodb
+    ports:
+      - 27017:27017
+
+volumes:
+  db-data:

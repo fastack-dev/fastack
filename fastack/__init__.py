@@ -4,6 +4,7 @@ from .controller import (  # noqa
     Controller,
     CreateController,
     CreateUpdateController,
+    CRUDController,
     DestroyController,
     ListController,
     ReadOnlyController,

@@ -6,7 +6,7 @@ MEDIA_PATH = Path(__file__).resolve().parent / MEDIA_ROOT
 PLUGINS = [
     # "fastack.plugins.aioredis",
     # "fastack.plugins.sqlmodel",
-    # "fastack.plugins.mongoengine",
+    "fastack.plugins.mongoengine",
 ]
 COMMANDS = [
     # "app.commands.user.cli"
@@ -20,12 +20,14 @@ COMMANDS = [
 
 # if you use the ``fastack.plugins.mongoengine``` plugin.
 # -------------------------------------------------------
-# MONGODB_NAME = ""
-# MONGODB_USER = ""
-# MONGODB_PASSWORD = ""
-# MONGODB_HOST = ""
-# MONGODB_PORT = 27017
-# MONGODB_URI = f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_HOST}/{MONGODB_NAME}"
+MONGODB_NAME = "fastack_db"
+MONGODB_USER = "fastack_user"
+MONGODB_PASSWORD = "fastack_pass"
+MONGODB_HOST = "localhost"
+MONGODB_PORT = 27017
+MONGODB_URI = (
+    f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_HOST}/{MONGODB_NAME}"
+)
 
 # if you use the ``fastack.plugins.aioredis``` plugin.
 # ----------------------------------------------------

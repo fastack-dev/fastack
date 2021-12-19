@@ -1,9 +1,10 @@
 from types import MethodType
-from typing import Any, Sequence, Type, Union
+from typing import Any, List, Sequence, Type, Union
 
 from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, conint
 
 from .constants import HTTP_METHODS, MAPPING_ENDPOINTS, METHOD_ENDPOINTS
 from .pagination import PageNumberPagination, Pagination
@@ -69,13 +70,17 @@ class Controller:
     def json(
         self,
         detail: str,
-        data: Union[dict, list] = None,
+        data: Union[dict, list, object] = None,
         status: int = 200,
         headers: dict = None,
     ) -> JSONResponse:
         content = {"detail": detail}
         if data:
-            content["data"] = data
+            if hasattr(data, "serialize"):
+                data = data.serialize()
+
+            content["data"] = jsonable_encoder(data)
+
         return JSONResponse(content, status, headers=headers)
 
 
@@ -89,8 +94,36 @@ class ListController(Controller):
 
     def paginate(self, data: Sequence, page: int = 1, page_size: int = 10) -> Sequence:
         if self.pagination_class:
-            return self.pagination_class(page, page_size).paginate(data)
-        return data
+            data = self.pagination_class(page, page_size).paginate(data)
+
+        results = []
+        for o in data:
+            if hasattr(o, "serialize"):
+                o = o.serialize()
+
+            o = jsonable_encoder(o)
+            results.append(o)
+
+        return results
+
+    def get_total_data(self, data: Any):
+        return len(data)
+
+    def get_total_page(self, total: int, page_size: int = 10) -> List[int]:
+        if total == 0:
+            return [1]
+
+        return list(
+            range(
+                1,
+                (
+                    total // page_size + 1
+                    if total % page_size != 0
+                    else total // page_size
+                )
+                + 1,
+            )
+        )
 
     def get_paginated_response(
         self,
@@ -100,15 +133,24 @@ class ListController(Controller):
         status: int = 200,
         headers: dict = None,
     ) -> JSONResponse:
+        total = self.get_total_data(data)
+        pages = self.get_total_page(total, page_size)
+        prev_page = page - 1
+        if prev_page < 1:
+            prev_page = None
+
+        next_page = page + 1
+        if next_page not in pages:
+            next_page = None
+
         content = {
             "data": self.paginate(data, page, page_size),
-            "page": page,
-            "page_size": page_size,
-            "total": len(data),
+            "paging": {"prev": prev_page, "next": next_page, "pages": pages},
+            "total": total,
         }
         return JSONResponse(content, status_code=status, headers=headers)
 
-    def list(self, page: int = 1, page_size: int = 10) -> Response:
+    def list(self, page: conint(gt=0) = 1, page_size: conint(gt=0) = 10) -> Response:
         raise NotImplementedError
 
 
@@ -132,4 +174,14 @@ class ReadOnlyController(RetrieveController, ListController):
 
 
 class CreateUpdateController(CreateController, UpdateController):
+    pass
+
+
+class CRUDController(
+    RetrieveController,
+    CreateController,
+    ListController,
+    UpdateController,
+    DestroyController,
+):
     pass
