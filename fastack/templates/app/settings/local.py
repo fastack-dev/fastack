@@ -25,6 +25,7 @@ COMMANDS = [
 # MONGODB_PASSWORD = ""
 # MONGODB_HOST = ""
 # MONGODB_PORT = 27017
+# MONGODB_URI = f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_HOST}/{MONGODB_NAME}"
 
 # if you use the ``fastack.plugins.aioredis``` plugin.
 # ----------------------------------------------------
