@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 pre-commit = "*"
-fastack = ">=0.4.1"
+fastack = {version = ">=0.4.1", extras = ["nosql"]}
 
 [dev-packages]
 
