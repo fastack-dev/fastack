@@ -14,8 +14,15 @@ COMMANDS = [
 
 # if you use the ``fastack.plugins.sqlmodel``` plugin.
 # ----------------------------------------------------
-SQLALCHEMY_DATABASE_URI = "sqlite:///db.sqlite"
-SQLALCHEMY_CONNECT_ARGS = {"check_same_thread": False}
+DB_USER = "fastack_user"
+DB_PASSWORD = "fastack_pass"
+DB_HOST = "localhost"
+DB_PORT = 5888
+DB_NAME = "fastack_db"
+SQLALCHEMY_DATABASE_URI = (
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+SQLALCHEMY_CONNECT_ARGS = {}
 SQLALCHEMY_OPTIONS = {"echo": True}
 
 # if you use the ``fastack.plugins.mongoengine``` plugin.
