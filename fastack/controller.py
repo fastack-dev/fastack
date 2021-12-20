@@ -17,10 +17,13 @@ class Controller:
     method_endpoints = METHOD_ENDPOINTS
 
     def get_endpoint_name(self) -> str:
-        c_name = "Controller"
+        c_suffix = "controller"
         name = type(self).__name__
-        if name.endswith(c_name):
-            name = name.rstrip(c_name)
+        # remove "controller" text if any
+        if len(name) > len(c_suffix):
+            name = name[len(name) - len(c_suffix) :].lower()
+            if name == c_suffix:
+                name = name.rstrip(c_suffix)
 
         rv = ""
         for c in name:

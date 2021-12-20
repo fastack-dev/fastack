@@ -34,6 +34,9 @@ class Fastack(FastAPI):
                 self.cli.command(command.__name__)(command)
 
     def include_controller(self, controller: Controller, **kwds):
+        assert isinstance(
+            controller, Controller
+        ), f"Controller must be an instance of {controller!r}"
         router = controller.build(**kwds)
         self.include_router(router)
 
