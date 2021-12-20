@@ -39,6 +39,15 @@ class Fastack(FastAPI):
 
 
 def create_app(settings: ModuleType, **kwds):
+    kwds.setdefault("title", "Fastack")
+    kwds.setdefault("description", "Fastack Framework")
+    kwds.setdefault(
+        "contact",
+        {
+            "name": "Fastack",
+            "url": "https://github.com/aprilahijriyan/fastack",
+        },
+    )
     kwds["debug"] = settings.DEBUG
     app = Fastack(**kwds)
     app.add_middleware(MergeAppStateMiddleware)
