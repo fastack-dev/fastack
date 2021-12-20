@@ -5,8 +5,7 @@ name = "pypi"
 
 [packages]
 pre-commit = "*"
-sqlmodel = "*"
-fastack = {path = "./../../dist/fastack-1.0.0-py3-none-any.whl"}
+fastack = {extras = ["sql"], version = "*"}
 
 [dev-packages]
 
