@@ -5,18 +5,17 @@ from sqlmodel import Session, SQLModel, create_engine
 from fastack import Fastack
 
 
-class DatabaseConnection:
+class DatabaseState:
     def __init__(self, engine: Engine):
         self.engine = engine
-        self.session: Session = Session(self.engine)
-        self.transaction: SessionTransaction = None
 
-    def __enter__(self):
-        self.transaction = self.session.begin()
-        return self.transaction
+    def open(self, engine: Engine = None, **kwds) -> Session:
+        engine = engine or self.engine
+        return Session(self.engine, **kwds)
 
-    def __exit__(self, type, value, traceback):
-        self.transaction.close()
+    def atomic(self, engine: Engine = None, **kwds) -> SessionTransaction:
+        engine = engine or self.engine
+        return self.open(engine, **kwds).begin()
 
 
 def setup(app: Fastack):
@@ -26,5 +25,5 @@ def setup(app: Fastack):
         connect_args = app.state.settings.SQLALCHEMY_CONNECT_ARGS
         options = app.state.settings.SQLALCHEMY_OPTIONS
         engine = create_engine(uri, connect_args=connect_args, **options)
-        app.state.open_db = DatabaseConnection(engine)
+        app.state.db = DatabaseState(engine)
         SQLModel.metadata.create_all(engine)

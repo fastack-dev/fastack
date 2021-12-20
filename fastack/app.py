@@ -4,8 +4,8 @@ from typing import Any, Callable, Union
 from fastapi import FastAPI
 from typer import Typer
 
-from fastack.controller import Controller
-
+from .controller import Controller
+from .middleware import MergeAppStateMiddleware
 from .utils import import_attr
 
 
@@ -41,6 +41,7 @@ class Fastack(FastAPI):
 def create_app(settings: ModuleType, **kwds):
     kwds["debug"] = settings.DEBUG
     app = Fastack(**kwds)
+    app.add_middleware(MergeAppStateMiddleware)
     app.set_settings(settings)
     app.load_plugins()
     app.load_commands()
