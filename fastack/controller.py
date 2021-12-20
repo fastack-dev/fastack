@@ -21,9 +21,9 @@ class Controller:
         name = type(self).__name__
         # remove "controller" text if any
         if len(name) > len(c_suffix):
-            name = name[len(name) - len(c_suffix) :].lower()
-            if name == c_suffix:
-                name = name.rstrip(c_suffix)
+            sfx = name[len(name) - len(c_suffix) :].lower()
+            if sfx == c_suffix:
+                name = name[: len(name) - len(c_suffix)]
 
         rv = ""
         for c in name:
@@ -37,7 +37,8 @@ class Controller:
         prefix = self.url_prefix
         if not prefix:
             prefix = self.get_endpoint_name()
-        return "/" + prefix.lstrip("/")
+        prefix = "/" + prefix.lstrip("/")
+        return prefix
 
     def get_path(self, method: str) -> str:
         return self.mapping_endpoints.get(method) or ""
