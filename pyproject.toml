@@ -4,6 +4,30 @@ version = "1.0.1"
 description = "Fastack is a blah blah blah framework!!!"
 authors = ["aprilahijriyan <37798612+aprilahijriyan@users.noreply.github.com>"]
 license = "MIT"
+maintainers = ["aprilahijriyan <37798612+aprilahijriyan@users.noreply.github.com>"]
+readme = "README.md"
+homepage = "https://github.com/fastack-dev/fastack"
+repository = "https://github.com/fastack-dev/fastack"
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Topic :: Internet",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4.0.0"
@@ -29,6 +53,10 @@ redis = ["aioredis"]
 [tool.poetry.scripts]
 
 fastack = "fastack.cli:fastack"
+
+[tool.poetry.urls]
+
+"Bug Tracker" = "https://github.com/fastack-dev/fastack/issues"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
