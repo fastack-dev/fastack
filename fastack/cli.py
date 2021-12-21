@@ -1,8 +1,9 @@
 import os
-import subprocess
+import sys
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 import click
+import uvicorn
 from pkg_resources import get_distribution, iter_entry_points
 from typer import Argument, Context, Exit, Option, Typer, colors, echo
 from typer.main import get_group_name
@@ -57,6 +58,7 @@ class Command(Typer):
             deprecated=deprecated,
             add_completion=add_completion,
         )
+        self.app: Union[Fastack, None] = self.load_app()
         self.load_commands()
 
     def init(
@@ -74,15 +76,17 @@ class Command(Typer):
             echo(f"fastack v{v}")
             raise Exit
 
+        ctx.obj = self.app
+
     def load_app(self) -> Union[Fastack, None]:
-        os.chdir(os.getcwd())
+        cwd = os.getcwd()
+        sys.path.insert(0, cwd)
         try:
             src = os.environ.get("FASTACK_APP", "app.main.app")
             app: Fastack = import_attr(src)
-            if not isinstance(app, Fastack):
-                echo(f"Invalid application type {app!r}")
+            if isinstance(app, Fastack):
+                return app
 
-            return app
         except (ImportError, AttributeError):
             pass
 
@@ -94,7 +98,6 @@ class Command(Typer):
             else:
                 self.command(ep.name)(cmd)
 
-        self.app = self.load_app()
         if self.app is not None:
             self.merge(self.app.cli)
 
@@ -140,15 +143,18 @@ fastack = Command(
 )
 
 
-@fastack.command(
-    context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
-)
+@fastack.command()
 def runserver(ctx: Context):
     """
     Run app with uvicorn.
     """
 
-    subprocess.call(["uvicorn", "app.main:app"] + ctx.args)
+    app = ctx.obj
+    if not isinstance(app, Fastack):
+        echo(f"Invalid application type {app!r}")
+        ctx.exit(1)
+
+    uvicorn.run(ctx.obj)
 
 
 @fastack.command()

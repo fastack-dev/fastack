@@ -6,7 +6,7 @@ from sqlmodel import Session
 from typer import Context, Typer, echo
 
 from fastack import Fastack
-from fastack.cli import with_asgi_lifespan
+from fastack.decorators import with_asgi_lifespan
 
 cli = Typer(name="book", help="Book manager")
 
