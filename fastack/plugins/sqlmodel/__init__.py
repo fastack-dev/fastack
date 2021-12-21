@@ -1,8 +1,9 @@
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm.session import SessionTransaction
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import SQLModel, create_engine
 
 from fastack import Fastack
+
+from .session import Session
 
 
 class DatabaseState:
@@ -12,10 +13,6 @@ class DatabaseState:
     def open(self, engine: Engine = None, **kwds) -> Session:
         engine = engine or self.engine
         return Session(self.engine, **kwds)
-
-    def atomic(self, engine: Engine = None, **kwds) -> SessionTransaction:
-        engine = engine or self.engine
-        return self.open(engine, **kwds).begin()
 
 
 def setup(app: Fastack):
