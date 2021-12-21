@@ -24,6 +24,14 @@
             "markers": "python_full_version >= '3.6.2'",
             "version": "==3.4.0"
         },
+        "asgi-lifespan": {
+            "hashes": [
+                "sha256:9a33e7da2073c4764bc79bd6136501d6c42f60e3d2168ba71235e84122eadb7f",
+                "sha256:9ea969dc5eb5cf08e52c08dce6f61afcadd28112e72d81c972b1d8eb8691ab53"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==1.0.1"
+        },
         "asgiref": {
             "hashes": [
                 "sha256:4ef1ab46b484e3c706329cedeff284a5d40824200638503f5768edb6de7d58e9",
@@ -75,11 +83,11 @@
                 "nosql"
             ],
             "hashes": [
-                "sha256:4cdcdc4df150f96f7d4f04fb5575e895bc071e7460be3520b57447f6fe965357",
-                "sha256:6df099ce782d7c178e0bad245b74d0da88c5cb7b0a8dd499f69576aac6915a32"
+                "sha256:5b22e6349548b4daf0621ee4d3d66ba5b47ece07d6ca3f9ca03dc8880ffe393b",
+                "sha256:e8c96d3d5666d363fc57d2c965eb86f701001436c2886bf894336b86b3fc04d3"
             ],
             "index": "pypi",
-            "version": "==1.0.1"
+            "version": "==2.0.0"
         },
         "fastapi": {
             "hashes": [
