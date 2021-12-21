@@ -8,9 +8,7 @@ PLUGINS = [
     "fastack.plugins.sqlmodel",
     # "fastack.plugins.mongoengine",
 ]
-COMMANDS = [
-    # "app.commands.user.cli"
-]
+COMMANDS = ["app.commands.book.cli"]
 
 # if you use the ``fastack.plugins.sqlmodel``` plugin.
 # ----------------------------------------------------
@@ -23,7 +21,7 @@ SQLALCHEMY_DATABASE_URI = (
     f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 SQLALCHEMY_CONNECT_ARGS = {}
-SQLALCHEMY_OPTIONS = {"echo": True}
+SQLALCHEMY_OPTIONS = {}
 
 # if you use the ``fastack.plugins.mongoengine``` plugin.
 # -------------------------------------------------------
