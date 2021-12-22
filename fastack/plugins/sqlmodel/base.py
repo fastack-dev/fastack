@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import Column, DateTime
 from sqlmodel import Field, SQLModel
@@ -9,7 +8,7 @@ from .session import Session
 
 
 class Model(SQLModel):
-    id: Optional[int] = Field(primary_key=True, default=None)
+    id: int = Field(primary_key=True)
     date_created: datetime = Field(sa_column=Column(DateTime, default=datetime.utcnow))
     date_updated: datetime = Field(sa_column=Column(DateTime, onupdate=datetime.utcnow))
 
