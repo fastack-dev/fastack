@@ -11,7 +11,6 @@ from .pagination import PageNumberPagination, Pagination
 
 
 class Controller:
-    queryset: Any = None
     url_prefix: str = None
     mapping_endpoints = MAPPING_ENDPOINTS
     method_endpoints = METHOD_ENDPOINTS
