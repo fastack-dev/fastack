@@ -164,7 +164,7 @@ class CreateController(Controller):
 
 
 class UpdateController(Controller):
-    def update(self, id: int) -> Response:
+    def update(self, id: int, body: BaseModel) -> Response:
         raise NotImplementedError
 
 
