@@ -1,6 +1,6 @@
 # Fastack
 
-fastack is a blah blah blah framework, for creating clean and easy-to-manage REST API project structures. It's built for FastAPI framework ❤️
+fastack is an intuitive framework based on FastAPI, for creating clean and easy-to-manage REST API project structures. It's built for FastAPI framework ❤️
 
 The goals of this project are:
 
@@ -8,17 +8,27 @@ The goals of this project are:
 * Create a REST API with our ``Controller`` class
 * Include pagination
 * Support adding own commands using the ``typer`` library
-* Integrated with docker & docker-compose
+* Plugin support
+* Integrated with docker
 * Integrated with pre-commit tool
 
 
-# Installation
+## Plugins
+
+List of official plugins:
+
+* [fastack-sqlmodel](https://github.com/fastack-dev/fastack-sqlmodel) - [SQLModel](https://github.com/tiangolo/sqlmodel) integration for fastack.
+* [fastack-migrate](https://github.com/fastack-dev/fastack-migrate) - [Alembic](https://alembic.sqlalchemy.org/en/latest/) integration for fastack.
+* [fastack-mongoengine](https://github.com/fastack-dev/fastack-mongoengine) - [MongoEngine](https://github.com/MongoEngine/mongoengine) integration for fastack.
+* [fastack-cache](https://github.com/fastack-dev/fastack-cache) - Caching plugin for fastack heart
+
+## Installation
 
 ```
 pip install fastack
 ```
 
-# Example
+## Example
 
 create project structure
 
@@ -39,6 +49,6 @@ run app
 fastack runserver
 ```
 
-# Documentation
+## Documentation
 
 Sorry in advance, for the documentation I haven't had time to make it 🙏
