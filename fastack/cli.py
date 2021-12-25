@@ -135,7 +135,7 @@ class Command(Typer):
 fastack = Command(
     name="fastack",
     help="""
-    fastack - blah blah blah framework!
+    fastack is an intuitive framework based on FastAPI.
     """,
     epilog="""
     fastack (c) 2021 aprila hijriyan.

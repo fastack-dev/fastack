@@ -48,7 +48,7 @@ def create_app(settings: ModuleType, **kwds):
         "contact",
         {
             "name": "Fastack",
-            "url": "https://github.com/aprilahijriyan/fastack",
+            "url": "https://github.com/fastack-dev/fastack",
         },
     )
     kwds["debug"] = settings.DEBUG
