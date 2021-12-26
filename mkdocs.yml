@@ -1,0 +1,86 @@
+site_name: Fastack
+repo_url: https://github.com/fastack-dev/fastack
+repo_name: fastack-dev/fastack
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2021 Aprila Hijriyan
+plugins:
+  - search
+  - git-revision-date
+  - git-revision-date-localized:
+      type: datetime
+      fallback_to_build_date: true
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.indexes
+    - toc.integrate
+
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Open Sans
+
+  palette:
+    - scheme: default
+      primary: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+extra:
+  social:
+    - icon: fontawesome/brands/facebook
+      link: https://facebook.com/apriladev
+
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/apriladev
+
+    - icon: fontawesome/brands/medium
+      link: https://apriladev.medium.com
+
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/apriladev/
+
+  alternate:
+    - name: English
+      link: /
+      lang: en
+
+    # - name: Indonesia
+    #   link: /id/
+    #   lang: id
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - installation.md
+  - Getting Started:
+    - tutorial/create_project.md
+    - tutorial/controller.md
+    - tutorial/cli.md
+    - tutorial/plugins.md
+
+  - Deployment:
+    - deployment/heroku.md
+    - deployment/docker.md
+
+  - plugins.md
+  - contributing.md
+  - support.md
