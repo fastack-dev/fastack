@@ -63,6 +63,7 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.magiclink
   - pymdownx.tasklist:
       custom_checkbox: true
   - attr_list
@@ -72,7 +73,7 @@ nav:
   - Home: index.md
   - installation.md
   - Getting Started:
-    - tutorial/create_project.md
+    - tutorial/introduction.md
     - tutorial/controller.md
     - tutorial/cli.md
     - tutorial/plugins.md
