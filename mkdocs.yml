@@ -16,6 +16,7 @@ theme:
   features:
     - navigation.indexes
     - toc.integrate
+    - content.code.annotate
 
   icon:
     repo: fontawesome/brands/github
@@ -60,9 +61,13 @@ extra:
 markdown_extensions:
   - toc:
       permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
   - pymdownx.magiclink
   - pymdownx.tasklist:
       custom_checkbox: true
