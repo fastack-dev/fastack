@@ -1,21 +1,29 @@
 from types import MethodType
-from typing import Any, List, Sequence, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
-from fastapi import APIRouter
+from fastapi import APIRouter, params, routing
+from fastapi.datastructures import Default
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
+from fastapi.routing import APIRoute
 from pydantic import BaseModel, conint
+from starlette.routing import BaseRoute
+from starlette.types import ASGIApp
 
 from .constants import HTTP_METHODS, MAPPING_ENDPOINTS, METHOD_ENDPOINTS
 from .pagination import PageNumberPagination, Pagination
 
 
 class Controller:
+    name: str = None
     url_prefix: str = None
     mapping_endpoints = MAPPING_ENDPOINTS
     method_endpoints = METHOD_ENDPOINTS
 
     def get_endpoint_name(self) -> str:
+        if self.name:
+            return self.name
+
         c_suffix = "controller"
         name = type(self).__name__
         # remove "controller" text if any
@@ -45,11 +53,50 @@ class Controller:
     def get_http_method(self, method: str) -> Union[str, None]:
         return self.method_endpoints.get(method) or None
 
-    def build(self, **kwds) -> APIRouter:
-        endpoint_name = self.get_endpoint_name().replace("-", " ").title()
-        kwds.setdefault("tags", [endpoint_name])
-        kwds.setdefault("prefix", self.get_url_prefix())
-        router = APIRouter(**kwds)
+    def build(
+        self,
+        *,
+        prefix: str = "",
+        tags: Optional[List[str]] = None,
+        dependencies: Optional[Sequence[params.Depends]] = None,
+        default_response_class: Type[Response] = Default(JSONResponse),
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        callbacks: Optional[List[BaseRoute]] = None,
+        routes: Optional[List[routing.BaseRoute]] = None,
+        redirect_slashes: bool = True,
+        default: Optional[ASGIApp] = None,
+        dependency_overrides_provider: Optional[Any] = None,
+        route_class: Type[APIRoute] = APIRoute,
+        on_startup: Optional[Sequence[Callable[[], Any]]] = None,
+        on_shutdown: Optional[Sequence[Callable[[], Any]]] = None,
+        deprecated: Optional[bool] = None,
+        include_in_schema: bool = True,
+    ) -> APIRouter:
+        endpoint_name = self.get_endpoint_name()
+        tag_name = endpoint_name.replace("-", " ").title()
+        if not tags:
+            tags = [tag_name]
+
+        if not prefix:
+            prefix = self.get_url_prefix()
+
+        router = APIRouter(
+            prefix=prefix,
+            tags=tags,
+            dependencies=dependencies,
+            default_response_class=default_response_class,
+            responses=responses,
+            callbacks=callbacks,
+            routes=routes,
+            redirect_slashes=redirect_slashes,
+            default=default,
+            dependency_overrides_provider=dependency_overrides_provider,
+            route_class=route_class,
+            on_startup=on_startup,
+            on_shutdown=on_shutdown,
+            deprecated=deprecated,
+            include_in_schema=include_in_schema,
+        )
         for method_name in dir(self):
             func = getattr(self, method_name)
             if method_name.startswith("_") or not isinstance(func, MethodType):
@@ -60,15 +107,20 @@ class Controller:
                 http_method = self.get_http_method(method_name)
 
             if http_method:
+                name = f"{endpoint_name}:{method_name}"
                 summary = f"{endpoint_name} {method_name.title()}"
                 path = self.get_path(method_name)
                 params = getattr(func, "__route_params__", None) or {}
                 params.setdefault("methods", [http_method])
-                params.setdefault("name", method_name)
+                params.setdefault("name", name)
                 params.setdefault("summary", summary)
+                path = params.pop("path", path)
                 router.add_api_route(path, func, **params)
 
         return router
+
+    def serialize_data(self, obj: Any) -> Any:
+        return obj.serialize()
 
     def json(
         self,
@@ -80,7 +132,7 @@ class Controller:
         content = {"detail": detail}
         if data:
             if hasattr(data, "serialize"):
-                data = data.serialize()
+                data = self.serialize_data(data)
 
             content["data"] = jsonable_encoder(data)
 
@@ -102,7 +154,7 @@ class ListController(Controller):
         results = []
         for o in data:
             if hasattr(o, "serialize"):
-                o = o.serialize()
+                o = self.serialize_data(o)
 
             o = jsonable_encoder(o)
             results.append(o)
