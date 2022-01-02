@@ -109,12 +109,12 @@ class Controller:
             if http_method:
                 name = f"{endpoint_name}:{method_name}"
                 summary = f"{endpoint_name} {method_name.title()}"
-                path = self.get_path(method_name)
+                default_path = self.get_path(method_name)
                 params = getattr(func, "__route_params__", None) or {}
                 params.setdefault("methods", [http_method])
                 params.setdefault("name", name)
                 params.setdefault("summary", summary)
-                path = params.pop("path", path)
+                path = params.pop("path", None) or default_path
                 router.add_api_route(path, func, **params)
 
         return router
