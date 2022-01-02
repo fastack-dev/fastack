@@ -3,10 +3,8 @@ import sys
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 import click
-import uvicorn
-from cookiecutter.main import cookiecutter
 from pkg_resources import get_distribution, iter_entry_points
-from typer import Argument, Context, Exit, Option, Typer, echo
+from typer import Context, Exit, Option, Typer, echo
 from typer.main import get_group_name
 from typer.models import Default
 
@@ -130,50 +128,3 @@ class Command(Typer):
 
             if not found:
                 self.registered_groups.append(group)
-
-
-fastack = Command(
-    name="fastack",
-    help="""
-    fastack is an intuitive framework based on FastAPI.
-    """,
-    epilog="""
-    fastack (c) 2021 aprila hijriyan.
-    """,
-)
-
-
-@fastack.command()
-def runserver(ctx: Context):
-    """
-    Run app with uvicorn.
-    """
-
-    app = ctx.obj
-    if not isinstance(app, Fastack):
-        echo(f"Invalid application type {app!r}")
-        ctx.exit(1)
-
-    uvicorn.run(ctx.obj)
-
-
-@fastack.command()
-def new(
-    name: str = Argument(None, help="Project name"),
-    output_dir: str = Argument(".", help="Output Directory"),
-    template: str = Option(
-        "gh:fastack-dev/fastack-app-starter-kit",
-        "-t",
-        "--template",
-        help="Cookiecutter Template",
-    ),
-):
-    """
-    Create project.
-    """
-
-    extra_context = {}
-    if name:
-        extra_context["project_name"] = name
-
-    cookiecutter(template, output_dir=output_dir, extra_context=extra_context)
