@@ -109,12 +109,12 @@ class Controller:
             if http_method:
                 name = f"{endpoint_name}:{method_name}"
                 summary = f"{endpoint_name} {method_name.title()}"
-                path = self.get_path(method_name)
+                default_path = self.get_path(method_name)
                 params = getattr(func, "__route_params__", None) or {}
                 params.setdefault("methods", [http_method])
                 params.setdefault("name", name)
                 params.setdefault("summary", summary)
-                path = params.pop("path", path)
+                path = params.pop("path", None) or default_path
                 router.add_api_route(path, func, **params)
 
         return router
@@ -199,9 +199,9 @@ class ListController(Controller):
             next_page = None
 
         content = {
-            "data": self.paginate(data, page, page_size),
-            "paging": {"prev": prev_page, "next": next_page, "pages": pages},
             "total": total,
+            "paging": {"next": next_page, "prev": prev_page, "pages": pages},
+            "data": self.paginate(data, page, page_size),
         }
         return JSONResponse(content, status_code=status, headers=headers)
 

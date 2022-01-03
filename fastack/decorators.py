@@ -77,32 +77,36 @@ def route(
             def decorated(*args, **kwds):
                 return func(*args, **kwds)
 
-        decorated.__route_params__ = {
-            "path": path,
-            "response_model": response_model,
-            "status_code": status_code,
-            "tags": tags,
-            "dependencies": dependencies,
-            "summary": summary,
-            "description": description,
-            "response_description": response_description,
-            "responses": responses,
-            "deprecated": deprecated,
-            "methods": methods,
-            "operation_id": operation_id,
-            "response_model_include": response_model_include,
-            "response_model_exclude": response_model_exclude,
-            "response_model_by_alias": response_model_by_alias,
-            "response_model_exclude_unset": response_model_exclude_unset,
-            "response_model_exclude_defaults": response_model_exclude_defaults,
-            "response_model_exclude_none": response_model_exclude_none,
-            "include_in_schema": include_in_schema,
-            "response_class": response_class,
-            "name": name,
-            "route_class_override": route_class_override,
-            "callbacks": callbacks,
-            "openapi_extra": openapi_extra,
-        }
+        params = getattr(decorated, "__route_params__", {})
+        params.update(
+            {
+                "path": path,
+                "response_model": response_model,
+                "status_code": status_code,
+                "tags": tags,
+                "dependencies": dependencies,
+                "summary": summary,
+                "description": description,
+                "response_description": response_description,
+                "responses": responses,
+                "deprecated": deprecated,
+                "methods": methods,
+                "operation_id": operation_id,
+                "response_model_include": response_model_include,
+                "response_model_exclude": response_model_exclude,
+                "response_model_by_alias": response_model_by_alias,
+                "response_model_exclude_unset": response_model_exclude_unset,
+                "response_model_exclude_defaults": response_model_exclude_defaults,
+                "response_model_exclude_none": response_model_exclude_none,
+                "include_in_schema": include_in_schema,
+                "response_class": response_class,
+                "name": name,
+                "route_class_override": route_class_override,
+                "callbacks": callbacks,
+                "openapi_extra": openapi_extra,
+            }
+        )
+        decorated.__route_params__ = params
         return decorated
 
     return wrapper
