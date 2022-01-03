@@ -199,9 +199,9 @@ class ListController(Controller):
             next_page = None
 
         content = {
-            "data": self.paginate(data, page, page_size),
-            "paging": {"prev": prev_page, "next": next_page, "pages": pages},
             "total": total,
+            "paging": {"next": next_page, "prev": prev_page, "pages": pages},
+            "data": self.paginate(data, page, page_size),
         }
         return JSONResponse(content, status_code=status, headers=headers)
 
