@@ -126,17 +126,20 @@ class Controller:
         self,
         detail: str,
         data: Union[dict, list, object] = None,
+        *,
         status: int = 200,
         headers: dict = None,
+        allow_empty: bool = True,
+        **kwargs: Any,
     ) -> JSONResponse:
         content = {"detail": detail}
-        if data:
+        if data or allow_empty:
             if hasattr(data, "serialize"):
                 data = self.serialize_data(data)
 
             content["data"] = jsonable_encoder(data)
 
-        return JSONResponse(content, status, headers=headers)
+        return JSONResponse(content, status_code=status, headers=headers, **kwargs)
 
 
 class RetrieveController(Controller):
@@ -185,8 +188,10 @@ class ListController(Controller):
         data: Sequence,
         page: int = 1,
         page_size: int = 10,
+        *,
         status: int = 200,
         headers: dict = None,
+        **kwargs: Any,
     ) -> JSONResponse:
         total = self.get_total_data(data)
         pages = self.get_total_page(total, page_size)
@@ -203,7 +208,7 @@ class ListController(Controller):
             "paging": {"next": next_page, "prev": prev_page, "pages": pages},
             "data": self.paginate(data, page, page_size),
         }
-        return JSONResponse(content, status_code=status, headers=headers)
+        return JSONResponse(content, status_code=status, headers=headers, **kwargs)
 
     def list(self, page: conint(gt=0) = 1, page_size: conint(gt=0) = 10) -> Response:
         raise NotImplementedError
