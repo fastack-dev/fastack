@@ -3,13 +3,11 @@ import sys
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 import click
-import uvicorn
 from pkg_resources import get_distribution, iter_entry_points
-from typer import Argument, Context, Exit, Option, Typer, colors, echo
+from typer import Context, Exit, Option, Typer, echo
 from typer.main import get_group_name
 from typer.models import Default
 
-from . import generator
 from .app import Fastack
 from .utils import import_attr
 
@@ -130,38 +128,3 @@ class Command(Typer):
 
             if not found:
                 self.registered_groups.append(group)
-
-
-fastack = Command(
-    name="fastack",
-    help="""
-    fastack is an intuitive framework based on FastAPI.
-    """,
-    epilog="""
-    fastack (c) 2021 aprila hijriyan.
-    """,
-)
-
-
-@fastack.command()
-def runserver(ctx: Context):
-    """
-    Run app with uvicorn.
-    """
-
-    app = ctx.obj
-    if not isinstance(app, Fastack):
-        echo(f"Invalid application type {app!r}")
-        ctx.exit(1)
-
-    uvicorn.run(ctx.obj)
-
-
-@fastack.command()
-def new(name: str = Argument(..., help="Project name")):
-    """
-    Create project.
-    """
-
-    echo(f"Creating project: {name}...", color=colors.BRIGHT_GREEN)
-    generator.create_project(name)
