@@ -106,14 +106,21 @@ class Controller:
             if http_method not in HTTP_METHODS:
                 http_method = self.get_http_method(method_name)
 
-            if http_method:
+            is_action = getattr(func, "__route_action__", False)
+            if http_method or is_action:
                 name = f"{endpoint_name}:{method_name}"
-                summary = f"{endpoint_name} {method_name.title()}"
+                summary = f"{endpoint_name} {method_name.replace('_', ' ').title()}"
                 default_path = self.get_path(method_name)
                 params = getattr(func, "__route_params__", None) or {}
-                params.setdefault("methods", [http_method])
-                params.setdefault("name", name)
-                params.setdefault("summary", summary)
+                if not params.get("methods", None):
+                    params["methods"] = [http_method]
+
+                if not params.get("name", None):
+                    params["name"] = name
+
+                if not params.get("summary", None):
+                    params["summary"] = summary
+
                 path = params.pop("path", None) or default_path
                 router.add_api_route(path, func, **params)
 

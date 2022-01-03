@@ -40,6 +40,7 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
 def route(
     path: Optional[str] = None,
     *,
+    action: bool = False,
     response_model: Optional[Type[Any]] = None,
     status_code: Optional[int] = None,
     tags: Optional[List[str]] = None,
@@ -107,6 +108,7 @@ def route(
             }
         )
         decorated.__route_params__ = params
+        decorated.__route_action__ = action
         return decorated
 
     return wrapper
