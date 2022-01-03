@@ -1,3 +1,0 @@
-# Deploy with docker
-
-todo
