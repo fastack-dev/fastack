@@ -83,10 +83,7 @@ nav:
     - tutorial/cli.md
     - tutorial/plugins.md
 
-  - Deployment:
-    - deployment/heroku.md
-    - deployment/docker.md
-
+  - deployment.md
   - plugins.md
   - contributing.md
   - support.md
