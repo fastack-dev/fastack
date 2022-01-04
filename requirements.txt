@@ -12,7 +12,7 @@ cfgv==3.3.1; python_full_version >= "3.6.1"
 chardet==4.0.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0"
 charset-normalizer==2.0.9; python_full_version >= "3.6.0" and python_version >= "3"
 click==8.0.3; python_full_version >= "3.6.2" and python_version >= "3.6"
-colorama==0.4.4; python_version >= "3.7" and python_full_version >= "3.6.2" and sys_platform == "win32" and platform_system == "Windows" and (python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.6")
+colorama==0.4.4; sys_platform == "win32" and python_version >= "3.7" and python_full_version >= "3.6.2" and platform_system == "Windows" and (python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.6")
 cookiecutter==1.7.3; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.5.0")
 decorator==5.1.0; python_version >= "3.7"
 distlib==0.3.4; python_full_version >= "3.6.1"
@@ -59,8 +59,7 @@ python-slugify==5.0.2; python_version >= "3.6" and python_full_version < "3.0.0"
 pytz==2021.3; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.6"
 pyyaml-env-tag==0.1; python_version >= "3.6"
 pyyaml==6.0; python_version >= "3.6" and python_full_version >= "3.6.1"
-requests==2.26.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0"
-shellingham==1.4.0; python_version >= "3.6"
+requests==2.27.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.6.0"
 six==1.16.0; python_full_version >= "3.6.1" and python_version >= "3.6"
 smmap==5.0.0; python_version >= "3.7"
 sniffio==1.2.0; python_version >= "3.6" and python_full_version >= "3.6.2"
