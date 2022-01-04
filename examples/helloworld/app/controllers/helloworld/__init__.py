@@ -1,4 +1,4 @@
-from fastapi import Response
+from fastapi import Request, Response
 from pydantic import conint
 
 from fastack.controller import ReadOnlyController
@@ -9,14 +9,23 @@ from .models import HelloWorldModel
 
 
 class HelloWorldController(ReadOnlyController):
+    name = "helloworld"
+    url_prefix = "/world"
+
     @route(response_model=PaginatedModel[HelloWorldModel])
-    def list(self, page: conint(gt=0) = 1, page_size: conint(gt=0) = 10) -> Response:
-        data = [{"id": i, "title": "Hello World"} for i in range(5)]
+    def list(
+        self, request: Request, page: conint(gt=0) = 1, page_size: conint(gt=0) = 10
+    ) -> Response:
+        data = [
+            {"id": i, "title": request.url_for("helloworld:list")} for i in range(5)
+        ]
         return self.get_paginated_response(data, page, page_size)
 
     @route(response_model=DetailModel[HelloWorldModel])
-    def retrieve(self, id: int) -> Response:
-        return self.json("Detail", {"id": id, "title": "hello world"})
+    def retrieve(self, request: Request, id: int) -> Response:
+        return self.json(
+            "Detail", {"id": id, "title": request.url_for("helloworld:retrieve", id=id)}
+        )
 
     @route(
         "/{id}/update",
