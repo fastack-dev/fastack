@@ -19,6 +19,7 @@ class Controller:
     url_prefix: str = None
     mapping_endpoints = MAPPING_ENDPOINTS
     method_endpoints = METHOD_ENDPOINTS
+    middlewares: Optional[Sequence[params.Depends]] = None
 
     def get_endpoint_name(self) -> str:
         if self.name:
@@ -80,6 +81,10 @@ class Controller:
         if not prefix:
             prefix = self.get_url_prefix()
 
+        if not dependencies:
+            dependencies = []
+
+        dependencies = dependencies + self.middlewares
         router = APIRouter(
             prefix=prefix,
             tags=tags,
