@@ -10,8 +10,8 @@ from starlette.routing import BaseRoute
 from starlette.types import ASGIApp, Receive, Scope, Send
 from typer import Typer
 
+from .context import _app_ctx_stack, _request_ctx_stack
 from .controller import Controller
-from .globals import _app_ctx_stack, _request_ctx_stack
 from .middleware import MergeAppStateMiddleware
 from .utils import import_attr
 

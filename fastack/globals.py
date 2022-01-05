@@ -1,15 +1,14 @@
 from typing import TYPE_CHECKING
 
-from werkzeug.local import LocalProxy, LocalStack
+from werkzeug.local import LocalProxy
+
+from .context import _app_ctx_stack, _request_ctx_stack
 
 if TYPE_CHECKING:
     from fastapi import Request
     from starlette.datastructures import State
 
     from .app import Fastack
-
-_app_ctx_stack = LocalStack()
-_request_ctx_stack = LocalStack()
 
 
 def _get_state() -> "State":
