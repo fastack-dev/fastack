@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastack"
-version = "3.2.0"
+version = "3.2.1"
 description = "fastack is an intuitive framework based on FastAPI"
 authors = ["aprilahijriyan <37798612+aprilahijriyan@users.noreply.github.com>"]
 license = "MIT"
