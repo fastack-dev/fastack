@@ -23,6 +23,7 @@ fastack is an intuitive framework based on FastAPI, for creating clean and easy-
 * Pagination support
 * Provide a `Controller` class for creating REST APIs
 * Provides command line to manage app
+* Support to access `app`, `request`, `state` globally!
 
 ## Plugins
 
