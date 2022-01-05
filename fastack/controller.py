@@ -84,7 +84,7 @@ class Controller:
         if not dependencies:
             dependencies = []
 
-        dependencies = dependencies + self.middlewares
+        dependencies = dependencies + (self.middlewares or [])
         router = APIRouter(
             prefix=prefix,
             tags=tags,
