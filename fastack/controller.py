@@ -244,7 +244,7 @@ class CreateUpdateController(CreateController, UpdateController):
     pass
 
 
-class CRUDController(
+class ModelController(
     RetrieveController,
     CreateController,
     ListController,
