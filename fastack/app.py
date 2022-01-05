@@ -1,7 +1,7 @@
 from types import ModuleType
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Sequence, Type, Union
 
-from fastapi import Depends, FastAPI, Request, params, routing
+from fastapi import Depends, FastAPI, Request, WebSocket, params, routing
 from fastapi.datastructures import Default
 from fastapi.responses import JSONResponse, Response
 from fastapi.routing import APIRoute
@@ -10,7 +10,7 @@ from starlette.routing import BaseRoute
 from starlette.types import ASGIApp, Receive, Scope, Send
 from typer import Typer
 
-from .context import _app_ctx_stack, _request_ctx_stack
+from .context import _app_ctx_stack, _request_ctx_stack, _websocket_ctx_stack
 from .controller import Controller
 from .middleware import MergeAppStateMiddleware
 from .utils import import_attr
@@ -85,12 +85,18 @@ class Fastack(FastAPI):
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         try:
             _app_ctx_stack.push(self)
-            if scope["type"] != "lifespan":
+            scope_type = scope["type"]
+            if scope_type == "http":
                 request = Request(scope, receive, send)
                 _request_ctx_stack.push(request)
 
+            elif scope_type == "websocket":
+                websocket = WebSocket(scope, receive, send)
+                _websocket_ctx_stack.push(websocket)
+
             await super().__call__(scope, receive, send)
         finally:
+            _websocket_ctx_stack.pop()
             _request_ctx_stack.pop()
             _app_ctx_stack.pop()
 
