@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 def _get_state() -> "State":
     state = None
-    if request is None and current_app is not None:
+    if current_app and not request:
         state = current_app.state
     else:
         state = request.state
