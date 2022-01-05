@@ -7,10 +7,11 @@ from fastapi.responses import JSONResponse, Response
 from fastapi.routing import APIRoute
 from starlette.middleware import Middleware
 from starlette.routing import BaseRoute
-from starlette.types import ASGIApp
+from starlette.types import ASGIApp, Receive, Scope, Send
 from typer import Typer
 
 from .controller import Controller
+from .globals import _app_ctx_stack, _request_ctx_stack
 from .middleware import MergeAppStateMiddleware
 from .utils import import_attr
 
@@ -80,6 +81,18 @@ class Fastack(FastAPI):
             include_in_schema=include_in_schema,
         )
         self.include_router(router)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        try:
+            _app_ctx_stack.push(self)
+            if scope["type"] != "lifespan":
+                request = Request(scope, receive, send)
+                _request_ctx_stack.push(request)
+
+            await super().__call__(scope, receive, send)
+        finally:
+            _request_ctx_stack.pop()
+            _app_ctx_stack.pop()
 
 
 def create_app(
