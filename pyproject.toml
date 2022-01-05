@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastack"
-version = "3.0.0"
+version = "3.1.0"
 description = "fastack is an intuitive framework based on FastAPI"
 authors = ["aprilahijriyan <37798612+aprilahijriyan@users.noreply.github.com>"]
 license = "MIT"
@@ -36,6 +36,7 @@ typer = "^0.4.0"
 uvicorn = "^0.16.0"
 asgi-lifespan = "^1.0.1"
 cookiecutter = "^1.7.3"
+Werkzeug = "^2.0.2"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^21.12b0", allow-prereleases = true}
