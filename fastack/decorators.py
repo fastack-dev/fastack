@@ -11,6 +11,8 @@ from fastapi.encoders import DictIntStrAny, SetIntStr
 from fastapi.responses import JSONResponse
 from starlette.routing import BaseRoute
 
+from .context import _app_ctx_stack
+
 
 def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
@@ -27,10 +29,14 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
         app = ctx.obj
 
         async def wrapper() -> Any:
-            async with LifespanManager(app):
-                if iscoroutinefunction(func):
-                    return await func(*args, **kwds)
-                return func(*args, **kwds)
+            try:
+                async with LifespanManager(app):
+                    _app_ctx_stack.push(app)
+                    if iscoroutinefunction(func):
+                        return await func(*args, **kwds)
+                    return func(*args, **kwds)
+            finally:
+                _app_ctx_stack.pop()
 
         return anyio.run(wrapper)
 
