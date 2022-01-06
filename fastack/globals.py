@@ -15,7 +15,7 @@ def _get_state() -> "State":
     state = None
     if current_app and not request:
         state = current_app.state
-    else:
+    elif request:
         state = request.state
     return state
 
