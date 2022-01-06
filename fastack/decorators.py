@@ -1,3 +1,5 @@
+import asyncio
+import warnings
 from functools import wraps
 from inspect import iscoroutinefunction
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Type, Union
@@ -10,11 +12,19 @@ from fastapi.datastructures import Default, DefaultPlaceholder
 from fastapi.encoders import DictIntStrAny, SetIntStr
 from fastapi.responses import JSONResponse
 from starlette.routing import BaseRoute
+from starlette.types import ASGIApp
 
 from .context import _app_ctx_stack
+from .utils import load_app
 
 
 def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
+    warnings.warn(
+        "with_asgi_lifespan is deprecated, use enable_context instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     @wraps(func)
     def executor(*args, **kwds):
         ctx = None
@@ -41,6 +51,57 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
         return anyio.run(wrapper)
 
     return executor
+
+
+def enable_context(
+    initializer: Callable = None, finalizer: Callable = None
+) -> Callable:
+    def wrapper(func):
+        @wraps(func)
+        def decorator(*args, **kwargs):
+            ctx = None
+            for _, v in kwargs.items():
+                if isinstance(v, click.core.Context):
+                    ctx = v
+                    break
+
+            app: ASGIApp = load_app()
+            if not app:
+                raise RuntimeError("Can't load app")
+
+            if ctx:
+                ctx.obj = app
+
+            async def executor():
+                try:
+                    if callable(initializer):
+                        initializer(app)
+
+                    async with LifespanManager(app):
+                        _app_ctx_stack.push(app)
+                        if iscoroutinefunction(func):
+                            rv = await func(*args, **kwargs)
+                        else:
+                            rv = func(*args, **kwargs)
+
+                        if callable(finalizer):
+                            finalizer(app, rv)
+
+                        return rv
+                finally:
+                    _app_ctx_stack.pop()
+
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+
+            task = loop.create_task(executor())
+            return loop.run_until_complete(task)
+
+        return decorator
+
+    return wrapper
 
 
 def route(
