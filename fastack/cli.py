@@ -1,5 +1,3 @@
-import os
-import sys
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 import click
@@ -9,7 +7,7 @@ from typer.main import get_group_name
 from typer.models import Default
 
 from .app import Fastack
-from .utils import import_attr
+from .utils import load_app
 
 
 class Command(Typer):
@@ -56,7 +54,7 @@ class Command(Typer):
             deprecated=deprecated,
             add_completion=add_completion,
         )
-        self.app: Union[Fastack, None] = self.load_app()
+        self.app: Union[Fastack, None] = load_app()
         self.load_commands()
 
     def init(
@@ -75,18 +73,6 @@ class Command(Typer):
             raise Exit
 
         ctx.obj = self.app
-
-    def load_app(self) -> Union[Fastack, None]:
-        cwd = os.getcwd()
-        sys.path.insert(0, cwd)
-        try:
-            src = os.environ.get("FASTACK_APP", "app.main.app")
-            app: Fastack = import_attr(src)
-            if isinstance(app, Fastack):
-                return app
-
-        except (ImportError, AttributeError):
-            pass
 
     def load_commands(self):
         for ep in iter_entry_points("fastack.commands"):  # pragma: no cover
