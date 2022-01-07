@@ -11,6 +11,10 @@ from .utils import load_app
 
 
 class Command(Typer):
+    """
+    Command base for fastack cli
+    """
+
     def __init__(
         self,
         *,
@@ -71,8 +75,6 @@ class Command(Typer):
             v = get_distribution("fastack").version
             echo(f"fastack v{v}")
             raise Exit
-
-        ctx.obj = self.app
 
     def load_commands(self):
         for ep in iter_entry_points("fastack.commands"):  # pragma: no cover

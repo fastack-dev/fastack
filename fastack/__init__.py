@@ -24,4 +24,8 @@ __all__ = [
     "ReadOnlyController",
     "RetrieveController",
     "UpdateController",
+    "APIEndpoint",
+    "HTTP_METHODS",
+    "MAPPING_ENDPOINTS",
+    "METHOD_ENDPOINTS",
 ]

@@ -1,19 +1,31 @@
 import os
 import sys
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .app import Fastack
 
 
-def import_attr(module: str):
+def import_attr(module: str) -> Any:
+    """
+    Import attributes from a module.
+
+    :param module: Module name (e.g. "os.path")
+
+    :return: Imported attributes
+    """
+
     package, attr = module.rsplit(".", 1)
     module = import_module(package)
     return getattr(module, attr)
 
 
 def load_app() -> "Fastack":
+    """
+    Load Fastack app from environment variable ``FASTACK_APP``.
+    """
+
     cwd = os.getcwd()
     sys.path.insert(0, cwd)
     try:

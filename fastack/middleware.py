@@ -10,6 +10,10 @@ from .globals import request, websocket
 
 
 class BaseMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware that supports HTTP and WebSocket connections
+    """
+
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         scope_type = scope["type"]
         if scope_type == "http":
@@ -27,16 +31,30 @@ class BaseMiddleware(BaseHTTPMiddleware):
         return response
 
     async def process_request(self, request: Request):
+        """
+        Process the http request
+        """
         raise NotImplementedError
 
     async def process_response(self, response: Response):
-        pass
+        """
+        Process the response
+        """
 
     async def process_websocket(self, websocket: WebSocket):
+        """
+        Process the websocket.
+        This is similar to process_request but for websocket.
+        """
+
         raise NotImplementedError
 
 
 class MergeAppStateMiddleware(BaseMiddleware):
+    """
+    Middleware that combines state in application to request and websocket.
+    """
+
     def update_state(self, object: Union[Request, WebSocket]):
         object.state._state.update(object.app.state._state)
 

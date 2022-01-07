@@ -56,17 +56,32 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
 def enable_context(
     initializer: Callable = None, finalizer: Callable = None
 ) -> Callable:
+    """
+    A decorator that activates the application context
+    The function can be a coroutine or a normal function.
+
+    :param initializer: The function to be called before the function is called.
+    :param finalizer: The function to be called after the function is called.
+
+    notes:
+        - The initializer will accept one argument. ``initializer(app)`` where ``app`` is the application.
+        - The finalizer will accept two argument. ``finalizer(app, rv)`` where ``app`` is the application and ``rv`` is the return value of the function.
+
+    """
+
     def wrapper(func):
         @wraps(func)
         def decorator(*args, **kwargs):
             ctx = None
             for _, v in kwargs.items():
+                # Finding Context in parameters
                 if isinstance(v, click.core.Context):
                     ctx = v
                     break
 
             app: ASGIApp = load_app()
             if ctx:
+                # Put the app object into Context.obj
                 ctx.obj = app
 
             async def executor():
@@ -129,6 +144,13 @@ def route(
     callbacks: Optional[List[BaseRoute]] = None,
     openapi_extra: Optional[Dict[str, Any]] = None
 ):
+    """
+    A decorator to add additional information for endpoints in OpenAPI.
+
+    :param path: The path of the endpoint.
+    :param action: To mark this method is the responder to be included in the controller.
+    """
+
     def wrapper(func):
         if iscoroutinefunction(func):
 
