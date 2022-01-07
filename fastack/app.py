@@ -1,37 +1,75 @@
 from types import ModuleType
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Sequence, Type, Union
 
-from fastapi import Depends, FastAPI, Request, params, routing
+from fastapi import Depends, FastAPI, Request, WebSocket, params, routing
 from fastapi.datastructures import Default
 from fastapi.responses import JSONResponse, Response
 from fastapi.routing import APIRoute
 from starlette.middleware import Middleware
 from starlette.routing import BaseRoute
-from starlette.types import ASGIApp
+from starlette.types import ASGIApp, Receive, Scope, Send
 from typer import Typer
 
+from .context import _app_ctx_stack, _request_ctx_stack, _websocket_ctx_stack
 from .controller import Controller
 from .middleware import MergeAppStateMiddleware
 from .utils import import_attr
 
 
 class Fastack(FastAPI):
+    """
+    Fastack application aims to support:
+
+    * App settings
+    * Adding a plugin
+    * Adding a command
+    * Adding a controller to create a REST APIs
+    * Access ``app``, ``request``, ``websocket``, ``state`` objects globally (like Flask)
+
+    """
+
+    # Storage for all commands and will be added to the "fastack" command, so you can access it.
     cli = Typer()
 
     def set_settings(self, settings: ModuleType):
+        """
+        Set settings for the application.
+
+        :param settings: settings module
+        """
+
         self.state.settings = settings
 
     def get_setting(self, name: str, default: Any = None):
+        """
+        Get setting value by name.
+
+        Args:
+            name (str): Setting name
+            default (Any, optional): Default value if setting is not found. Defaults to None.
+
+        Returns:
+            Any: Setting value
+        """
+
         assert self.state.settings is not None
         return getattr(self.state.settings, name, default)
 
     def load_plugins(self):
+        """
+        Load plugins from settings.
+        """
+
         for plugin in self.get_setting("PLUGINS", []):
             plugin += ".setup"
             plugin = import_attr(plugin)
             plugin(self)
 
     def load_commands(self):
+        """
+        Load commands from settings.
+        """
+
         for command in self.get_setting("COMMANDS", []):
             command: Union[Callable, Typer] = import_attr(command)
             if isinstance(command, Typer):
@@ -59,9 +97,17 @@ class Fastack(FastAPI):
         deprecated: Optional[bool] = None,
         include_in_schema: bool = True,
     ):
+        """
+        Include controller to the application.
+
+        :param controller: Controller instance
+
+        For other parameters, please see the documentation of ``fastapi.APIRouter.add_api_route``.
+        """
+
         assert isinstance(
             controller, Controller
-        ), f"Controller must be an instance of {controller!r}"
+        ), f"Controller must be an instance of {Controller!r}"
         router = controller.build(
             prefix=prefix,
             tags=tags,
@@ -80,6 +126,29 @@ class Fastack(FastAPI):
             include_in_schema=include_in_schema,
         )
         self.include_router(router)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        try:
+            # Add the app instance to the global stack, so you can access it globally via ``fastack.globals.current_app``
+            _app_ctx_stack.push(self)
+            scope_type = scope["type"]
+            # If the scope is http we will create a request instance object and add it to the global stack,
+            # so that it can be accessed via ``fastack.globals.request``
+            if scope_type == "http":
+                request = Request(scope, receive, send)
+                _request_ctx_stack.push(request)
+
+            # Same as above, but for websocket
+            elif scope_type == "websocket":
+                websocket = WebSocket(scope, receive, send)
+                _websocket_ctx_stack.push(websocket)
+
+            await super().__call__(scope, receive, send)
+        finally:
+            # Clean global stack, when app finish processing request
+            _websocket_ctx_stack.pop()
+            _request_ctx_stack.pop()
+            _app_ctx_stack.pop()
 
 
 def create_app(
@@ -118,6 +187,10 @@ def create_app(
     include_in_schema: bool = True,
     **extra: Any,
 ):
+    """
+    Create a Fastack application.
+    """
+
     if not contact:
         contact = {
             "name": "Fastack",

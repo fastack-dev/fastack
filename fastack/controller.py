@@ -15,12 +15,68 @@ from .pagination import PageNumberPagination, Pagination
 
 
 class Controller:
+    """
+    Base Controller for creating REST APIs.
+
+    Example:
+
+    ```python
+    from pydantic import BaseModel
+
+    class UserBody(BaseModel):
+        name: str
+
+    class UserController(Controller):
+        def get(self, id: int):
+            user = User.get(id)
+            return self.json("User", user)
+
+        def post(self, body: UserBody):
+            user = User.create(**body.dict())
+            return self.json("Created", user)
+
+        def put(self, id: int, body: UserBody):
+            user = User.get(id)
+            user.update(**body.dict())
+            return self.json("Updated", user)
+
+        def delete(self, id: int):
+            user = User.get(id)
+            user.delete()
+            return self.json("Deleted")
+
+    user_controller = UserController()
+    app.include_controller(user_controller)
+    ```
+
+    Attributes:
+        - name: Name of the controller. If not provided, the name of the class will be used.
+        - url_prefix: URL prefix of the controller. If not provided, the name of the controller will be used.
+        - mapping_endpoints: Mapping to get default path.
+        - method_endpoints: Mapping to get default HTTP method.
+        - middlewares: List of middlewares (dependencies) to be applied to all routes.
+
+    """
+
     name: str = None
     url_prefix: str = None
     mapping_endpoints = MAPPING_ENDPOINTS
     method_endpoints = METHOD_ENDPOINTS
+    middlewares: Optional[Sequence[params.Depends]] = None
 
     def get_endpoint_name(self) -> str:
+        """
+        Get the name of the controller.
+        This will be used to prefix the endpoint name (eg user)
+        when you create the absolute path of an endpoint using ``request.url_for``
+        it looks like this ``request.url_for('user:get')``
+
+        ``get`` here is the method name (responder) so you can replace it according to the method name
+        such as ``post``, ``put``, ``delete``, ``retrieve``, etc.
+
+        Returns:
+            str: Name of the controller.
+        """
         if self.name:
             return self.name
 
@@ -41,6 +97,14 @@ class Controller:
         return rv.lower()
 
     def get_url_prefix(self) -> str:
+        """
+        Get the URL prefix of the controller.
+        If not provided, the name of the controller will be used.
+
+        Returns:
+            str: URL prefix of the controller.
+        """
+
         prefix = self.url_prefix
         if not prefix:
             prefix = self.get_endpoint_name()
@@ -48,9 +112,20 @@ class Controller:
         return prefix
 
     def get_path(self, method: str) -> str:
+        """
+        Get the path of an endpoint.
+
+        :param method: Name of the method.
+        """
+
         return self.mapping_endpoints.get(method) or ""
 
     def get_http_method(self, method: str) -> Union[str, None]:
+        """
+        Get the HTTP method of an endpoint.
+
+        :param method: Name of the method.
+        """
         return self.method_endpoints.get(method) or None
 
     def build(
@@ -72,6 +147,10 @@ class Controller:
         deprecated: Optional[bool] = None,
         include_in_schema: bool = True,
     ) -> APIRouter:
+        """
+        Makes all APIs in controllers into a router (APIRouter)
+        """
+
         endpoint_name = self.get_endpoint_name()
         tag_name = endpoint_name.replace("-", " ").title()
         if not tags:
@@ -80,6 +159,10 @@ class Controller:
         if not prefix:
             prefix = self.get_url_prefix()
 
+        if not dependencies:
+            dependencies = []
+
+        dependencies = dependencies + (self.middlewares or [])
         router = APIRouter(
             prefix=prefix,
             tags=tags,
@@ -99,6 +182,7 @@ class Controller:
         )
         for method_name in dir(self):
             func = getattr(self, method_name)
+            # skip if it's not a method, valid methods shouldn't be prefixed with _
             if method_name.startswith("_") or not isinstance(func, MethodType):
                 continue
 
@@ -106,8 +190,12 @@ class Controller:
             if http_method not in HTTP_METHODS:
                 http_method = self.get_http_method(method_name)
 
+            # Checks if a method has an HTTP method.
+            # Also, if no HTTP method is found there is another option to add the method to the router.
+            # Just need to mark method using ``fastack.decorators.route()`` decorator with ``action=True`` parameter.
             is_action = getattr(func, "__route_action__", False)
             if http_method or is_action:
+                # To generate an absolute path, using request.url_for(...)
                 name = f"{endpoint_name}:{method_name}"
                 summary = f"{endpoint_name} {method_name.replace('_', ' ').title()}"
                 default_path = self.get_path(method_name)
@@ -121,12 +209,18 @@ class Controller:
                 if not params.get("summary", None):
                     params["summary"] = summary
 
+                # if no path is provided, use the default path
                 path = params.pop("path", None) or default_path
                 router.add_api_route(path, func, **params)
 
         return router
 
     def serialize_data(self, obj: Any) -> Any:
+        """
+        Serialize data to JSON.
+        By default it will use the "serialize" method on the object to convert the data.
+        """
+
         return obj.serialize()
 
     def json(
@@ -139,6 +233,25 @@ class Controller:
         allow_empty: bool = True,
         **kwargs: Any,
     ) -> JSONResponse:
+        """
+        Return a JSON response.
+        By default the json response will be formatted like this:
+
+        ```json
+        {
+            "detail": "...",
+            "data": ...
+        }
+        ```
+
+        :param detail: Detail of the response.
+        :param data: Data to be serialized.
+        :param status: HTTP status code.
+        :param headers: HTTP headers.
+        :param allow_empty: Allows blank data to be shown to frontend.
+        :param kwargs: Additional arguments to be passed to the JSONResponse.
+        """
+
         content = {"detail": detail}
         if data or allow_empty:
             if hasattr(data, "serialize"):
@@ -150,14 +263,38 @@ class Controller:
 
 
 class RetrieveController(Controller):
+    """
+    Controller for retrieving data.
+    """
+
     def retrieve(self, id: int) -> Response:
+        """
+        Retrieve a single object with the given ID.
+        """
+
         raise NotImplementedError
 
 
 class ListController(Controller):
+    """
+    Controller for listing data.
+
+    Attributes:
+        - `pagination_class`: Class to be used for pagination.
+    """
+
     pagination_class: Type[Pagination] = PageNumberPagination
 
     def paginate(self, data: Sequence, page: int = 1, page_size: int = 10) -> Sequence:
+        """
+        Paginate data.
+
+        :param data: Data to be paginated.
+        :param page: Page number.
+        :param page_size: Page size.
+
+        """
+
         if self.pagination_class:
             data = self.pagination_class(page, page_size).paginate(data)
 
@@ -172,9 +309,21 @@ class ListController(Controller):
         return results
 
     def get_total_data(self, data: Any):
+        """
+        Get total data.
+        Might be useful if the data is a QuerySet or something that can compute :)
+        """
+
         return len(data)
 
     def get_total_page(self, total: int, page_size: int = 10) -> List[int]:
+        """
+        Get total pages.
+
+        :param total: Total data.
+        :param page_size: Page size.
+        """
+
         if total == 0:
             return [1]
 
@@ -200,6 +349,17 @@ class ListController(Controller):
         headers: dict = None,
         **kwargs: Any,
     ) -> JSONResponse:
+        """
+        Return a paginated response.
+
+        :param data: Data to be paginated.
+        :param page: Page number.
+        :param page_size: Page size.
+        :param status: HTTP status code.
+        :param headers: HTTP headers.
+        :param kwargs: Additional arguments to be passed to the JSONResponse.
+        """
+
         total = self.get_total_data(data)
         pages = self.get_total_page(total, page_size)
         prev_page = page - 1
@@ -218,37 +378,71 @@ class ListController(Controller):
         return JSONResponse(content, status_code=status, headers=headers, **kwargs)
 
     def list(self, page: conint(gt=0) = 1, page_size: conint(gt=0) = 10) -> Response:
+        """
+        List data.
+        """
+
         raise NotImplementedError
 
 
 class CreateController(Controller):
+    """
+    Controller for creating data.
+    """
+
     def create(self, body: BaseModel) -> Response:
+        """
+        adding a new object.
+        """
+
         raise NotImplementedError
 
 
 class UpdateController(Controller):
+    """
+    Controller for updating data.
+    """
+
     def update(self, id: int, body: BaseModel) -> Response:
+        """
+        Update an object with the given ID.
+        """
+
         raise NotImplementedError
 
 
 class DestroyController(Controller):
+    """
+    Controller for deleting data.
+    """
+
     def destroy(self, id: int) -> Response:
+        """
+        Delete an object with the given ID.
+        """
+
         raise NotImplementedError
 
 
 class ReadOnlyController(RetrieveController, ListController):
-    pass
+    """
+    Controller for read-only data.
+    """
 
 
 class CreateUpdateController(CreateController, UpdateController):
-    pass
+    """
+    Controller for creating and updating data.
+    """
 
 
-class CRUDController(
+class ModelController(
     RetrieveController,
     CreateController,
     ListController,
     UpdateController,
     DestroyController,
 ):
-    pass
+    """
+    Model Controller for creating REST APIs.
+    """

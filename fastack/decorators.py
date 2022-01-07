@@ -1,3 +1,5 @@
+import asyncio
+import warnings
 from functools import wraps
 from inspect import iscoroutinefunction
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Type, Union
@@ -10,9 +12,19 @@ from fastapi.datastructures import Default, DefaultPlaceholder
 from fastapi.encoders import DictIntStrAny, SetIntStr
 from fastapi.responses import JSONResponse
 from starlette.routing import BaseRoute
+from starlette.types import ASGIApp
+
+from .context import _app_ctx_stack
+from .utils import load_app
 
 
 def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
+    warnings.warn(
+        "with_asgi_lifespan is deprecated, use enable_context instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     @wraps(func)
     def executor(*args, **kwds):
         ctx = None
@@ -27,14 +39,81 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
         app = ctx.obj
 
         async def wrapper() -> Any:
-            async with LifespanManager(app):
-                if iscoroutinefunction(func):
-                    return await func(*args, **kwds)
-                return func(*args, **kwds)
+            try:
+                async with LifespanManager(app):
+                    _app_ctx_stack.push(app)
+                    if iscoroutinefunction(func):
+                        return await func(*args, **kwds)
+                    return func(*args, **kwds)
+            finally:
+                _app_ctx_stack.pop()
 
         return anyio.run(wrapper)
 
     return executor
+
+
+def enable_context(
+    initializer: Callable = None, finalizer: Callable = None
+) -> Callable:
+    """
+    A decorator that activates the application context
+    The function can be a coroutine or a normal function.
+
+    :param initializer: The function to be called before the function is called.
+    :param finalizer: The function to be called after the function is called.
+
+    notes:
+        - The initializer will accept one argument. ``initializer(app)`` where ``app`` is the application.
+        - The finalizer will accept two argument. ``finalizer(app, rv)`` where ``app`` is the application and ``rv`` is the return value of the function.
+
+    """
+
+    def wrapper(func):
+        @wraps(func)
+        def decorator(*args, **kwargs):
+            ctx = None
+            for _, v in kwargs.items():
+                # Finding Context in parameters
+                if isinstance(v, click.core.Context):
+                    ctx = v
+                    break
+
+            app: ASGIApp = load_app()
+            if ctx:
+                # Put the app object into Context.obj
+                ctx.obj = app
+
+            async def executor():
+                try:
+                    if callable(initializer):
+                        initializer(app)
+
+                    async with LifespanManager(app):
+                        _app_ctx_stack.push(app)
+                        if iscoroutinefunction(func):
+                            rv = await func(*args, **kwargs)
+                        else:
+                            rv = func(*args, **kwargs)
+
+                        if callable(finalizer):
+                            finalizer(app, rv)
+
+                        return rv
+                finally:
+                    _app_ctx_stack.pop()
+
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+
+            task = loop.create_task(executor())
+            return loop.run_until_complete(task)
+
+        return decorator
+
+    return wrapper
 
 
 def route(
@@ -65,6 +144,13 @@ def route(
     callbacks: Optional[List[BaseRoute]] = None,
     openapi_extra: Optional[Dict[str, Any]] = None
 ):
+    """
+    A decorator to add additional information for endpoints in OpenAPI.
+
+    :param path: The path of the endpoint.
+    :param action: To mark this method is the responder to be included in the controller.
+    """
+
     def wrapper(func):
         if iscoroutinefunction(func):
 

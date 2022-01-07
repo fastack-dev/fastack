@@ -1,9 +1,14 @@
+import nest_asyncio
+
+nest_asyncio.apply()
+
 import uvicorn
 from cookiecutter.main import cookiecutter
-from typer import Argument, Context, Option, echo
+from typer import Argument, Option
 
-from .app import Fastack
 from .cli import Command
+from .decorators import enable_context
+from .globals import current_app
 
 fastack = Command(
     name="fastack",
@@ -11,23 +16,20 @@ fastack = Command(
     fastack is an intuitive framework based on FastAPI.
     """,
     epilog="""
-    fastack (c) 2021 aprila hijriyan.
+    fastack (c) 2021 - 2022 aprila hijriyan.
     """,
 )
 
 
 @fastack.command()
-def runserver(ctx: Context):
+@enable_context()
+def runserver(port: int = Option(6000, "-p", "--port", help="Port to run the server.")):
     """
     Run app with uvicorn.
     """
 
-    app = ctx.obj
-    if not isinstance(app, Fastack):
-        echo(f"Invalid application type {app!r}")
-        ctx.exit(1)
-
-    uvicorn.run(ctx.obj)
+    app = current_app._get_current_object()
+    uvicorn.run(app, port=port, lifespan="on")
 
 
 @fastack.command()

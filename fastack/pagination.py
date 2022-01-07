@@ -3,23 +3,31 @@ from typing import Sequence
 
 
 class Pagination(metaclass=ABCMeta):
+    """
+    Abstract class for pagination
+    """
+
     @abstractmethod
     def paginate(self, data: Sequence) -> Sequence:
         pass
 
 
 class PageNumberPagination(Pagination):
+    """
+    Pagination class for page number
+    """
+
     def __init__(self, page: int, page_size: int):
         self.page = page
         self.page_size = page_size
 
-    def get_offset(self):
+    def get_offset(self) -> int:
         return self.page_size * (self.page - 1)
 
-    def get_limit(self):
+    def get_limit(self) -> int:
         return self.page_size
 
-    def paginate(self, data: Sequence):
+    def paginate(self, data: Sequence) -> Sequence:
         offset = self.get_offset()
         limit = self.get_limit()
         return data[offset : offset + limit]
