@@ -33,10 +33,11 @@ classifiers = [
 python = ">=3.7,<4.0.0"
 fastapi = "^0.70.1"
 typer = "^0.4.0"
-uvicorn = "^0.16.0"
+uvicorn = {extras = ["standard"], version = "^0.16.0"}
 asgi-lifespan = "^1.0.1"
 cookiecutter = "^1.7.3"
 Werkzeug = "^2.0.2"
+nest-asyncio = "^1.5.4"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^21.12b0", allow-prereleases = true}

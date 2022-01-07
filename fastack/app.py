@@ -62,7 +62,7 @@ class Fastack(FastAPI):
     ):
         assert isinstance(
             controller, Controller
-        ), f"Controller must be an instance of {controller!r}"
+        ), f"Controller must be an instance of {Controller!r}"
         router = controller.build(
             prefix=prefix,
             tags=tags,
