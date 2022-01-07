@@ -66,9 +66,6 @@ def enable_context(
                     break
 
             app: ASGIApp = load_app()
-            if not app:
-                raise RuntimeError("Can't load app")
-
             if ctx:
                 ctx.obj = app
 
