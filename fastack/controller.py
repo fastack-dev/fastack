@@ -11,6 +11,7 @@ from starlette.routing import BaseRoute
 from starlette.types import ASGIApp
 
 from .constants import HTTP_METHODS, MAPPING_ENDPOINTS, METHOD_ENDPOINTS
+from .globals import request
 from .pagination import PageNumberPagination, Pagination
 
 
@@ -94,7 +95,18 @@ class Controller:
                 c = "-" + c
             rv += c
 
-        return rv.lower()
+        # Save endpoint name
+        self.name = rv.lower()
+        return name
+
+    def url_for(self, name: str, **path_params) -> str:
+        """
+        Generate absolute URL for an endpoint.
+
+        :param name: Name of the endpoint.
+        """
+
+        return request.url_for(self.get_endpoint_name() + ":" + name, **path_params)
 
     def get_url_prefix(self) -> str:
         """
@@ -127,6 +139,13 @@ class Controller:
         :param method: Name of the method.
         """
         return self.method_endpoints.get(method) or None
+
+    def join_endpoint_name(self, name: str) -> str:
+        """
+        Join endpoint name with controller name.
+        """
+
+        return self.get_endpoint_name() + ":" + name
 
     def build(
         self,
@@ -196,15 +215,17 @@ class Controller:
             is_action = getattr(func, "__route_action__", False)
             if http_method or is_action:
                 # To generate an absolute path, using request.url_for(...)
-                name = f"{endpoint_name}:{method_name}"
                 summary = f"{endpoint_name} {method_name.replace('_', ' ').title()}"
                 default_path = self.get_path(method_name)
                 params = getattr(func, "__route_params__", None) or {}
                 if not params.get("methods", None):
                     params["methods"] = [http_method]
 
-                if not params.get("name", None):
-                    params["name"] = name
+                name = params.pop("name", None)
+                if not name:
+                    name = method_name
+
+                params["name"] = self.join_endpoint_name(name)
 
                 if not params.get("summary", None):
                     params["summary"] = summary
