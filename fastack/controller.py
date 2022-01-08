@@ -1,5 +1,6 @@
 from types import MethodType
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
+from urllib.parse import urlencode, urlparse, urlunparse
 
 from fastapi import APIRouter, params, routing
 from fastapi.datastructures import Default
@@ -99,14 +100,31 @@ class Controller:
         self.name = rv.lower()
         return name
 
-    def url_for(self, name: str, **path_params) -> str:
+    def url_for(self, name: str, **params) -> str:
         """
         Generate absolute URL for an endpoint.
 
         :param name: Name of the endpoint.
+        :param params: Can be path parameters or query parameters.
         """
 
-        return request.url_for(self.get_endpoint_name() + ":" + name, **path_params)
+        path_params = {}
+        endpoint_name = self.join_endpoint_name(name)
+        routes: List[APIRoute] = request.app.routes
+        for route in routes:
+            if route.name == endpoint_name:
+                paths = list(route.param_convertors.keys())
+                for path in paths:
+                    if path in params:
+                        path_value = params.pop(path)
+                        path_params[path] = path_value
+                break
+
+        url = request.url_for(endpoint_name, **path_params)
+        parsed = list(urlparse(url))
+        query = urlencode(params, doseq=True)
+        parsed[4] = query
+        return urlunparse(parsed)
 
     def get_url_prefix(self) -> str:
         """
