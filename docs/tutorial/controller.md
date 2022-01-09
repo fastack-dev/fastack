@@ -130,7 +130,7 @@ Controller to add data
 
 ### DestroyController
 
-Controller to clear data
+Controller to delete data
 
 ### ListController
 
@@ -152,6 +152,6 @@ It is a combination of ``RetrieveController`` and ``ListController`` controllers
 
 It is a combination of ``CreateController`` and ``UpdateController`` controllers.
 
-### CRUDController
+### ModelController
 
 It is a combination of ``CreateController``, ``DestroyController``, ``RetrieveController`` ``UpdateController`` and ``ListController`` controllers.
