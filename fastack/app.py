@@ -12,7 +12,7 @@ from typer import Typer
 
 from .context import _app_ctx_stack, _request_ctx_stack, _websocket_ctx_stack
 from .controller import Controller
-from .middleware import MergeAppStateMiddleware
+from .middleware import MiddlewareManager, StateMiddleware
 from .utils import import_attr
 
 
@@ -127,6 +127,10 @@ class Fastack(FastAPI):
         )
         self.include_router(router)
 
+    @property
+    def middleware(self) -> MiddlewareManager:
+        return MiddlewareManager(self)
+
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         try:
             # Add the app instance to the global stack, so you can access it globally via ``fastack.globals.current_app``
@@ -135,7 +139,7 @@ class Fastack(FastAPI):
             # If the scope is http we will create a request instance object and add it to the global stack,
             # so that it can be accessed via ``fastack.globals.request``
             if scope_type == "http":
-                request = Request(scope, receive, send)
+                request = Request(scope, receive)
                 _request_ctx_stack.push(request)
 
             # Same as above, but for websocket
@@ -228,7 +232,7 @@ def create_app(
         include_in_schema=include_in_schema,
         **extra,
     )
-    app.add_middleware(MergeAppStateMiddleware)
+    app.add_middleware(StateMiddleware)
     app.set_settings(settings)
     app.load_plugins()
     app.load_commands()
