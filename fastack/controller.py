@@ -1,6 +1,5 @@
 from types import MethodType
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
-from urllib.parse import urlencode, urlparse, urlunparse
 
 from fastapi import APIRouter, params, routing
 from fastapi.datastructures import Default
@@ -12,8 +11,8 @@ from starlette.routing import BaseRoute
 from starlette.types import ASGIApp
 
 from .constants import HTTP_METHODS, MAPPING_ENDPOINTS, METHOD_ENDPOINTS
-from .globals import request
 from .pagination import PageNumberPagination, Pagination
+from .utils import url_for
 
 
 class Controller:
@@ -104,27 +103,12 @@ class Controller:
         """
         Generate absolute URL for an endpoint.
 
-        :param name: Name of the endpoint.
+        :param name: Method name (e.g. retrieve).
         :param params: Can be path parameters or query parameters.
         """
 
-        path_params = {}
         endpoint_name = self.join_endpoint_name(name)
-        routes: List[APIRoute] = request.app.routes
-        for route in routes:
-            if route.name == endpoint_name:
-                paths = list(route.param_convertors.keys())
-                for path in paths:
-                    if path in params:
-                        path_value = params.pop(path)
-                        path_params[path] = path_value
-                break
-
-        url = request.url_for(endpoint_name, **path_params)
-        parsed = list(urlparse(url))
-        query = urlencode(params, doseq=True)
-        parsed[4] = query
-        return urlunparse(parsed)
+        return url_for(endpoint_name, **params)
 
     def get_url_prefix(self) -> str:
         """

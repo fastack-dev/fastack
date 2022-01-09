@@ -1,10 +1,16 @@
 import os
 import sys
 from importlib import import_module
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+
+from fastapi.routing import APIRoute
 
 if TYPE_CHECKING:
     from .app import Fastack
+
+from urllib.parse import urlencode, urlparse, urlunparse
+
+from .globals import request
 
 
 def import_attr(module: str) -> Any:
@@ -57,3 +63,29 @@ def lookup_exception_handler(
                 return exception_handlers[cls]
     else:
         return exception_handlers.get(exc_or_status)
+
+
+def url_for(name: str, **params) -> str:
+    """
+    Generate absolute URL for an endpoint.
+
+    :param name: Name of the endpoint.
+    :param params: Can be path parameters or query parameters.
+    """
+
+    path_params = {}
+    routes: List[APIRoute] = request.app.routes
+    for route in routes:
+        if route.name == name:
+            paths = list(route.param_convertors.keys())
+            for path in paths:
+                if path in params:
+                    path_value = params.pop(path)
+                    path_params[path] = path_value
+            break
+
+    url = request.url_for(name, **path_params)
+    parsed = list(urlparse(url))
+    query = urlencode(params, doseq=True)
+    parsed[4] = query
+    return urlunparse(parsed)
