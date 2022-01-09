@@ -26,7 +26,7 @@ fastack = Command(
 
 @fastack.command()
 @enable_context()
-def runserver(port: int = Option(6000, "-p", "--port", help="Port to run the server.")):
+def runserver(port: int = Option(2304, "-p", "--port", help="Port to run the server.")):
     """
     Run app with uvicorn.
     """
