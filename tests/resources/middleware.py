@@ -1,10 +1,8 @@
-from typing import Union
-
 from fastapi import HTTPException, Request, Response, WebSocket, status
 
 
-def is_approved(obj: Union[Request, WebSocket]) -> bool:
-    auth = obj.headers.get("Authorization")
+def is_approved(request: Request) -> bool:
+    auth = request.headers.get("Authorization")
     if auth != "Bearer test":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Unauthorized")
 
