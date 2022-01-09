@@ -17,15 +17,27 @@
 
 fastack is an intuitive framework based on FastAPI, for creating clean and easy-to-manage REST API project structures. It's built for FastAPI framework ❤️
 
-## Features
+## WARNING 🚨
+
+This is an early development, lots of changes with each release. Also this is an experimental project, as I'm currently studying asynchronous environments.
+
+FYI, this isn't the only intuitive framework project I've made. I've also made with different framework bases, including:
+
+* [zemfrog](https://github.com/zemfrog/zemfrog) - Based on [Flask framework](https://flask.palletsprojects.com) **Abandoned**
+* [falca](https://github.com/aprilahijriyan/falca) - Based on [Falcon framework](https://falconframework.org/) **Not maintained at this time**
+
+
+
+## Features 🔥
 
 * Project layout (based on cookiecutter template)
 * Pagination support
 * Provide a `Controller` class for creating REST APIs
 * Provides command line to manage app
-* Support to access `app`, `request`, `state` globally!
+* Support to access `app`, `request`, `state`, and `websocket` globally!
+* and more!
 
-## Plugins
+## Plugins 🎉
 
 List of official plugins:
 
@@ -34,42 +46,51 @@ List of official plugins:
 * [fastack-mongoengine](https://github.com/fastack-dev/fastack-mongoengine) - [MongoEngine](https://github.com/MongoEngine/mongoengine) integration for fastack.
 * [fastack-cache](https://github.com/fastack-dev/fastack-cache) - Caching plugin for fastack
 
-## Installation
+## Installation 📦
 
 ```
 pip install -U fastack
 ```
 
-## Example
+## Example 📚
 
-create project structure
+Create a project
 
 ```
 fastack new awesome-project
 cd awesome-project
 ```
 
-install pipenv & create virtual environment
+Install pipenv & create virtual environment
 
 ```
 pip install pipenv && pipenv install && pipenv shell
 ```
 
-run app
+Run app
 
 ```
 fastack runserver
 ```
 
-## Documentation
+## Documentation 📖
 
 For the latest documentation, see the [feature/docs](https://github.com/fastack-dev/fastack/tree/feature/docs) branch.
 
+Build the latest documentation locally:
 
-## Tests
+```
+mkdocs serve
+```
 
-Run tests with ``tox``, maybe you need to install python version 3.7, 3.8 and 3.9 first.
+Or alternatively, you can visit https://fastack.readthedocs.io/en/latest/
+
+## Tests 🔬
+
+Run tests with ``tox``, maybe you need to install python version `3.7`, `3.8` and `3.9` first.
 
 ```
 tox
 ```
+
+All components have not been fully tested, feel free if anyone wants to help make unit tests :)
