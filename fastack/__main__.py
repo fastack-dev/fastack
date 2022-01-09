@@ -1,10 +1,13 @@
-import nest_asyncio
+import nest_asyncio  # noqa
 
 nest_asyncio.apply()
 
+from typing import List, Union
+
 import uvicorn
 from cookiecutter.main import cookiecutter
-from typer import Argument, Option
+from fastapi.routing import APIRoute, APIWebSocketRoute
+from typer import Argument, Option, echo
 
 from .cli import Command
 from .decorators import enable_context
@@ -52,6 +55,23 @@ def new(
         extra_context["project_name"] = name
 
     cookiecutter(template, output_dir=output_dir, extra_context=extra_context)
+
+
+@fastack.command()
+@enable_context()
+def routes():
+    """
+    List all routes.
+    """
+
+    echo("List of all routes:")
+    routes: List[Union[APIRoute, APIWebSocketRoute]] = current_app.routes
+    for route in routes:
+        path_str = f"* {route.path}"
+        if isinstance(route, APIRoute):
+            path_str += f" {route.methods!r}"
+        path_str += f" ({route.name})"
+        print(path_str)
 
 
 if __name__ == "__main__":
