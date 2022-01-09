@@ -1,7 +1,7 @@
 import os
 import sys
 from importlib import import_module
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
 
 if TYPE_CHECKING:
     from .app import Fastack
@@ -40,3 +40,20 @@ def load_app() -> "Fastack":
         infoMsg += "    $ fastack runserver\n\n"
         infoMsg += "  I hope this helps!"
         raise RuntimeError(infoMsg) from e
+
+
+def lookup_exception_handler(
+    exception_handlers: Dict[Union[int, Type[Exception]], Callable],
+    exc_or_status: Union[Exception, int],
+) -> Optional[Callable]:
+    """
+    Lookup exception handler.
+    Taken from starlette.exceptions.ExceptionMiddleware.
+    """
+
+    if isinstance(exc_or_status, Exception):
+        for cls in type(exc_or_status).__mro__:
+            if cls in exception_handlers:
+                return exception_handlers[cls]
+    else:
+        return exception_handlers.get(exc_or_status)

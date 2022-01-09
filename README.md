@@ -64,3 +64,12 @@ fastack runserver
 ## Documentation
 
 For the latest documentation, see the [feature/docs](https://github.com/fastack-dev/fastack/tree/feature/docs) branch.
+
+
+## Tests
+
+Run tests with ``tox``, maybe you need to install python version 3.7, 3.8 and 3.9 first.
+
+```
+tox
+```

@@ -1,5 +1,6 @@
 from types import MethodType
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
+from urllib.parse import urlencode, urlparse, urlunparse
 
 from fastapi import APIRouter, params, routing
 from fastapi.datastructures import Default
@@ -11,6 +12,7 @@ from starlette.routing import BaseRoute
 from starlette.types import ASGIApp
 
 from .constants import HTTP_METHODS, MAPPING_ENDPOINTS, METHOD_ENDPOINTS
+from .globals import request
 from .pagination import PageNumberPagination, Pagination
 
 
@@ -94,7 +96,35 @@ class Controller:
                 c = "-" + c
             rv += c
 
-        return rv.lower()
+        # Save endpoint name
+        self.name = rv.lower()
+        return name
+
+    def url_for(self, name: str, **params) -> str:
+        """
+        Generate absolute URL for an endpoint.
+
+        :param name: Name of the endpoint.
+        :param params: Can be path parameters or query parameters.
+        """
+
+        path_params = {}
+        endpoint_name = self.join_endpoint_name(name)
+        routes: List[APIRoute] = request.app.routes
+        for route in routes:
+            if route.name == endpoint_name:
+                paths = list(route.param_convertors.keys())
+                for path in paths:
+                    if path in params:
+                        path_value = params.pop(path)
+                        path_params[path] = path_value
+                break
+
+        url = request.url_for(endpoint_name, **path_params)
+        parsed = list(urlparse(url))
+        query = urlencode(params, doseq=True)
+        parsed[4] = query
+        return urlunparse(parsed)
 
     def get_url_prefix(self) -> str:
         """
@@ -127,6 +157,13 @@ class Controller:
         :param method: Name of the method.
         """
         return self.method_endpoints.get(method) or None
+
+    def join_endpoint_name(self, name: str) -> str:
+        """
+        Join endpoint name with controller name.
+        """
+
+        return self.get_endpoint_name() + ":" + name
 
     def build(
         self,
@@ -196,15 +233,17 @@ class Controller:
             is_action = getattr(func, "__route_action__", False)
             if http_method or is_action:
                 # To generate an absolute path, using request.url_for(...)
-                name = f"{endpoint_name}:{method_name}"
                 summary = f"{endpoint_name} {method_name.replace('_', ' ').title()}"
                 default_path = self.get_path(method_name)
                 params = getattr(func, "__route_params__", None) or {}
                 if not params.get("methods", None):
                     params["methods"] = [http_method]
 
-                if not params.get("name", None):
-                    params["name"] = name
+                name = params.pop("name", None)
+                if not name:
+                    name = method_name
+
+                params["name"] = self.join_endpoint_name(name)
 
                 if not params.get("summary", None):
                     params["summary"] = summary
