@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from starlette.middleware.base import DispatchFunction
+
 from .base import (
     BaseMiddleware,
     ProcessRequestFunc,
@@ -86,11 +88,20 @@ class MiddlewareManager:
         self.app.add_middleware(BaseMiddleware, process_websocket=func)
         return func
 
+    def process_http(self, func: DispatchFunction):
+        """
+        Original FastAPI.middleware
+        """
+
+        self.app.add_middleware(BaseMiddleware, dispatch=func)
+        return func
+
     def __call__(self, middleware_type: str):
         assert middleware_type in (
+            "http",
             "request",
             "response",
             "websocket",
-        ), "middleware_type must be 'request', 'response or 'websocket'"
+        ), "middleware_type must be 'http', 'request', 'response or 'websocket'"
         func = getattr(self, "process_{}".format(middleware_type))
         return func
