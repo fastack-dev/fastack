@@ -6,7 +6,7 @@ APP_ENV: str = os.environ.get("APP_ENV", "local")
 
 if "APP_SETTINGS_LOADED" not in os.environ:
     try:
-        mod = import_module("app.settings." + APP_ENV)
+        mod = import_module("tests.settings." + APP_ENV)
     except ModuleNotFoundError:
         print(f"File configuration not found: {APP_ENV!r}")
         exit()
