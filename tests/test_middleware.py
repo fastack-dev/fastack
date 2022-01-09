@@ -1,8 +1,10 @@
+from fastapi import Request, Response, WebSocket
 from fastapi.testclient import TestClient
 
 from fastack import Fastack
 from fastack.globals import websocket
-from tests.resources.middleware import (
+from tests.resources.middleware import (  # noqa
+    AuthMiddleware,
     process_request,
     process_response,
     process_websocket,
@@ -10,9 +12,20 @@ from tests.resources.middleware import (
 
 
 def test_middleware(app: Fastack, client: TestClient):
-    app.middleware("request")(process_request)
-    app.middleware("response")(process_response)
-    app.middleware("websocket")(process_websocket)
+    # app.add_middleware(AuthMiddleware)
+
+    @app.middleware("request")
+    async def on_request(request: Request):
+        await process_request(request)
+
+    @app.middleware("response")
+    async def on_response(response: Response, exc: Exception = None):
+        await process_response(response, exc)
+
+    @app.middleware("websocket")
+    async def on_websocket(ws: WebSocket):
+        await process_websocket(ws)
+
     response = client.get("/")
     assert response.status_code == 401
     assert response.headers["X-Success"] == "0"

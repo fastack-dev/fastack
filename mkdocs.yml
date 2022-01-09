@@ -80,6 +80,7 @@ nav:
   - Getting Started:
     - tutorial/introduction.md
     - tutorial/controller.md
+    - tutorial/middleware.md
     - tutorial/cli.md
     - tutorial/plugins.md
 

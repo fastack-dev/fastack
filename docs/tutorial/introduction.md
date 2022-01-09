@@ -42,11 +42,11 @@ your-project
 ```
 
 * ``app``: Location of your application
-* ``app/commands``: A place to add your commands. [See here](./cli.md)
-* ``app/controllers``: Location of REST APIs. [See here](./controller.md)
+* ``app/commands``: A place to add your commands. [Want to jump?](./cli.md)
+* ``app/controllers``: Location of REST APIs. [Want to jump?](./controller.md)
 * ``app/main.py``: FastAPI App
-* ``app/models.py``: A place to create model with SQLModel or document with mongoengine
-* ``app/plugins``: A place to make your own plugins. [See here](./plugins.md)
+* ``app/models.py``: A place to create (**Model** with *SQLModel*) or (**Document** with *MongoEngine*)
+* ``app/plugins``: A place to make your own plugins. [Want to jump?](./plugins.md)
 * ``app/settings``: Your app configuration list
 * ``docker-compose.yml``, ``Dockerfile``, ``entrypoint.sh``: A file for bundling your app into a docker container.
 * ``Pipfile``: We use ``pipenv`` as the package manager.
@@ -59,8 +59,22 @@ cd your-project
 fastack runserver
 ```
 
-!!! note
+To run the app you can use the command ``fastack runserver`` or use ``uvicorn`` directly.
 
-    To run the app you can use the command ``fastack runserver`` or use ``uvicorn`` directly.
+!!! warning
 
-And taraaa you just finished the introduction part, keep it up! 🥳
+    Don't use ``fastack runserver`` in a production environment!
+
+## Application settings
+
+By default the app settings will use the local settings stored in ``app/settings/local.py``.
+How do we use other settings? e.g. in a production environment.
+
+To select the app settings for a specific environment, you can add the ``APP_ENV`` environment with a filename value that is in the ``app/settings`` directory. For example:
+
+```sh
+export APP_ENV=production
+fastack runserver
+```
+
+It will use the settings from ``app/settings/production.py``. That's it :)
