@@ -71,6 +71,8 @@ class Command(Typer):
         if ctx.resilient_parsing:  # pragma: no cover
             return
 
+        ctx.obj = self.app
+
         if version:
             v = get_distribution("fastack").version
             echo(f"fastack v{v}")

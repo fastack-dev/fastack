@@ -60,8 +60,8 @@ def enable_context(
     A decorator that activates the application context
     The function can be a coroutine or a normal function.
 
-    :param initializer: The function to be called before the function is called.
-    :param finalizer: The function to be called after the function is called.
+    :param initializer: The function to be called before application context starts.
+    :param finalizer: The function that will be called after your function is called.
 
     notes:
         - The initializer will accept one argument. ``initializer(app)`` where ``app`` is the application.
@@ -79,9 +79,14 @@ def enable_context(
                     ctx = v
                     break
 
-            app: ASGIApp = load_app()
-            if ctx:
-                # Put the app object into Context.obj
+            app: ASGIApp = None
+            if ctx is None:
+                app = load_app()
+            else:
+                app = ctx.obj
+
+            if ctx and not app:
+                # Put the app object into Context.obj if not exists
                 ctx.obj = app
 
             async def executor():
