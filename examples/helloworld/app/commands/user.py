@@ -9,6 +9,9 @@ cli = Typer(name="user", help="user command")
 @cli.command()
 @enable_context()
 async def create():
+    """
+    Create new user
+    """
     can_create_user = current_app.get_setting("CAN_CREATE_USER", False)
     if can_create_user:
         email = input("Email: ")
