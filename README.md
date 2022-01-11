@@ -1,5 +1,7 @@
 # Fastack
 
+[![Join the chat at https://gitter.im/fastack-dev/fastack](https://badges.gitter.im/fastack-dev/fastack.svg)](https://gitter.im/fastack-dev/fastack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 <p align="center">
 <a href="https://github.com/fastack-dev/fastack"><img src="https://raw.githubusercontent.com/fastack-dev/fastack/main/docs/images/logo.png" alt="Fastack"></a>
 </p>
