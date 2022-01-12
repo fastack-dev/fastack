@@ -244,7 +244,10 @@ class Controller:
         By default it will use the "serialize" method on the object to convert the data.
         """
 
-        return obj.serialize()
+        func = getattr(obj, "serialize", None)
+        if callable(func):
+            obj = func()
+        return obj
 
     def json(
         self,
@@ -277,9 +280,7 @@ class Controller:
 
         content = {"detail": detail}
         if data or allow_empty:
-            if hasattr(data, "serialize"):
-                data = self.serialize_data(data)
-
+            data = self.serialize_data(data)
             content["data"] = jsonable_encoder(data)
 
         return JSONResponse(content, status_code=status, headers=headers, **kwargs)
@@ -323,9 +324,7 @@ class ListController(Controller):
 
         results = []
         for o in data:
-            if hasattr(o, "serialize"):
-                o = self.serialize_data(o)
-
+            o = self.serialize_data(o)
             o = jsonable_encoder(o)
             results.append(o)
 
