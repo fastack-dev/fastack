@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from starlette.middleware.base import DispatchFunction
 
@@ -17,6 +17,10 @@ __all__ = [
     "MiddlewareManager",
     "StateMiddleware",
     "BaseMiddleware",
+]
+
+DecoratedMiddleware = Union[
+    ProcessRequestFunc, ProcessResponseFunc, ProcessWebSocketFunc, DispatchFunction
 ]
 
 
@@ -96,7 +100,7 @@ class MiddlewareManager:
         self.app.add_middleware(BaseMiddleware, dispatch=func)
         return func
 
-    def __call__(self, middleware_type: str):
+    def __call__(self, middleware_type: str) -> DecoratedMiddleware:
         assert middleware_type in (
             "http",
             "request",

@@ -1,8 +1,9 @@
 from types import ModuleType
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Sequence, Type, Union
 
-from fastapi import Depends, FastAPI, Request, WebSocket, params, routing
+from fastapi import FastAPI, Request, WebSocket, params
 from fastapi.datastructures import Default
+from fastapi.params import Depends
 from fastapi.responses import JSONResponse, Response
 from fastapi.routing import APIRoute
 from starlette.middleware import Middleware
@@ -60,9 +61,9 @@ class Fastack(FastAPI):
         Load plugins from settings.
         """
 
-        for plugin in self.get_setting("PLUGINS", []):
-            plugin += ".setup"
-            plugin = import_attr(plugin)
+        for plugin_str in self.get_setting("PLUGINS", []):
+            plugin_str += ".setup"
+            plugin = import_attr(plugin_str)
             plugin(self)
 
     def load_commands(self):
@@ -70,8 +71,8 @@ class Fastack(FastAPI):
         Load commands from settings.
         """
 
-        for command in self.get_setting("COMMANDS", []):
-            command: Union[Callable, Typer] = import_attr(command)
+        for command_str in self.get_setting("COMMANDS", []):
+            command: Union[Callable, Typer] = import_attr(command_str)
             if isinstance(command, Typer):
                 self.cli.add_typer(command)
             else:
@@ -87,7 +88,7 @@ class Fastack(FastAPI):
         default_response_class: Type[Response] = Default(JSONResponse),
         responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
         callbacks: Optional[List[BaseRoute]] = None,
-        routes: Optional[List[routing.BaseRoute]] = None,
+        routes: Optional[List[BaseRoute]] = None,
         redirect_slashes: bool = True,
         default: Optional[ASGIApp] = None,
         dependency_overrides_provider: Optional[Any] = None,
@@ -128,7 +129,7 @@ class Fastack(FastAPI):
         self.include_router(router)
 
     @property
-    def middleware(self) -> MiddlewareManager:
+    def middleware(self) -> MiddlewareManager:  # type: ignore[override]
         return MiddlewareManager(self)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:

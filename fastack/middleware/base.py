@@ -31,10 +31,10 @@ class BaseMiddleware(BaseHTTPMiddleware):
         self,
         app: ASGIApp,
         *,
-        dispatch: DispatchFunction = None,
-        process_request: ProcessRequestFunc = None,
-        process_response: ProcessResponseFunc = None,
-        process_websocket: ProcessWebSocketFunc = None,
+        dispatch: Optional[DispatchFunction] = None,
+        process_request: Optional[ProcessRequestFunc] = None,
+        process_response: Optional[ProcessResponseFunc] = None,
+        process_websocket: Optional[ProcessWebSocketFunc] = None,
     ) -> None:
         self.app = app
         self.dispatch_func = self.dispatch if dispatch is None else dispatch
@@ -74,7 +74,7 @@ class BaseMiddleware(BaseHTTPMiddleware):
                     else:
                         response = await run_in_threadpool(handler, request, exc)
 
-                    await self.process_response_func(response, exc)
+                    await self.process_response_func(response, exc)  # type: ignore[operator]
                     await response(scope, receive, send)
                     task_group.cancel_scope.cancel()
                     return
@@ -88,7 +88,7 @@ class BaseMiddleware(BaseHTTPMiddleware):
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         response = await call_next(request)
-        await self.process_response_func(response)
+        await self.process_response_func(response)  # type: ignore[operator]
         return response
 
     async def process_request(self, request: Request):
@@ -96,7 +96,9 @@ class BaseMiddleware(BaseHTTPMiddleware):
         Process the http request
         """
 
-    async def process_response(self, response: Response, exc: Exception = None):
+    async def process_response(
+        self, response: Response, exc: Optional[Exception] = None
+    ):
         """
         Process the response
 

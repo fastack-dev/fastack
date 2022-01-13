@@ -1,12 +1,12 @@
 from types import MethodType
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
-from fastapi import APIRouter, params, routing
+from fastapi import APIRouter, Query, params
 from fastapi.datastructures import Default
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 from fastapi.routing import APIRoute
-from pydantic import BaseModel, conint
+from pydantic import BaseModel
 from starlette.routing import BaseRoute
 from starlette.types import ASGIApp
 
@@ -59,11 +59,11 @@ class Controller:
 
     """
 
-    name: str = None
-    url_prefix: str = None
+    name: Optional[str] = None
+    url_prefix: Optional[str] = None
     mapping_endpoints = MAPPING_ENDPOINTS
     method_endpoints = METHOD_ENDPOINTS
-    middlewares: Optional[Sequence[params.Depends]] = None
+    middlewares: Optional[Sequence[params.Depends]] = []
 
     def get_endpoint_name(self) -> str:
         """
@@ -158,7 +158,7 @@ class Controller:
         default_response_class: Type[Response] = Default(JSONResponse),
         responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
         callbacks: Optional[List[BaseRoute]] = None,
-        routes: Optional[List[routing.BaseRoute]] = None,
+        routes: Optional[List[BaseRoute]] = None,
         redirect_slashes: bool = True,
         default: Optional[ASGIApp] = None,
         dependency_overrides_provider: Optional[Any] = None,
@@ -183,7 +183,7 @@ class Controller:
         if not dependencies:
             dependencies = []
 
-        dependencies = dependencies + (self.middlewares or [])
+        dependencies = dependencies + (self.middlewares or [])  # type: ignore[operator]
         router = APIRouter(
             prefix=prefix,
             tags=tags,
@@ -207,7 +207,7 @@ class Controller:
             if method_name.startswith("_") or not isinstance(func, MethodType):
                 continue
 
-            http_method = method_name.upper()
+            http_method: Optional[str] = method_name.upper()
             if http_method not in HTTP_METHODS:
                 http_method = self.get_http_method(method_name)
 
@@ -252,10 +252,10 @@ class Controller:
     def json(
         self,
         detail: str,
-        data: Union[dict, list, object] = None,
+        data: Optional[Union[dict, list, object]] = None,
         *,
         status: int = 200,
-        headers: dict = None,
+        headers: Optional[dict] = None,
         allow_empty: bool = True,
         **kwargs: Any,
     ) -> JSONResponse:
@@ -368,7 +368,7 @@ class ListController(Controller):
         page_size: int = 10,
         *,
         status: int = 200,
-        headers: dict = None,
+        headers: Optional[dict] = None,
         **kwargs: Any,
     ) -> JSONResponse:
         """
@@ -386,11 +386,11 @@ class ListController(Controller):
         pages = self.get_total_page(total, page_size)
         prev_page = page - 1
         if prev_page < 1:
-            prev_page = None
+            prev_page = None  # type: ignore[assignment]
 
         next_page = page + 1
         if next_page not in pages:
-            next_page = None
+            next_page = None  # type: ignore[assignment]
 
         content = {
             "total": total,
@@ -399,7 +399,9 @@ class ListController(Controller):
         }
         return JSONResponse(content, status_code=status, headers=headers, **kwargs)
 
-    def list(self, page: conint(gt=0) = 1, page_size: conint(gt=0) = 10) -> Response:
+    def list(
+        self, page: int = Query(1, gt=0), page_size: int = Query(10, gt=0)
+    ) -> Response:
         """
         List data.
         """
