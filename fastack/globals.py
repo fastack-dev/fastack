@@ -11,15 +11,15 @@ if TYPE_CHECKING:
 
 
 def _get_app() -> "Fastack":
-    app = _app_ctx_stack.top
+    app = _app_ctx_stack.get()
     if not app:
         raise RuntimeError("Working outside of application context.")
     return app
 
 
 current_app: "Fastack" = LocalProxy(_get_app)
-request: Request = LocalProxy(lambda: _request_ctx_stack.top)
-websocket: WebSocket = LocalProxy(lambda: _websocket_ctx_stack.top)
+request: Request = LocalProxy(lambda: _request_ctx_stack.get())
+websocket: WebSocket = LocalProxy(lambda: _websocket_ctx_stack.get())
 state: State = LocalProxy(lambda: current_app.state)
 
 

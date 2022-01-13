@@ -1,3 +1,4 @@
+from contextvars import Token
 from types import ModuleType
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Sequence, Type, Union
 
@@ -133,27 +134,31 @@ class Fastack(FastAPI):
         return MiddlewareManager(self)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        req_token: Optional[Token] = None
+        ws_token: Optional[Token] = None
         try:
             # Add the app instance to the global stack, so you can access it globally via ``fastack.globals.current_app``
-            _app_ctx_stack.push(self)
+            app_token: Token = _app_ctx_stack.set(self)
             scope_type = scope["type"]
             # If the scope is http we will create a request instance object and add it to the global stack,
             # so that it can be accessed via ``fastack.globals.request``
             if scope_type == "http":
                 request = Request(scope, receive)
-                _request_ctx_stack.push(request)
+                req_token = _request_ctx_stack.set(request)
 
             # Same as above, but for websocket
             elif scope_type == "websocket":
                 websocket = WebSocket(scope, receive, send)
-                _websocket_ctx_stack.push(websocket)
+                ws_token = _websocket_ctx_stack.set(websocket)
 
             await super().__call__(scope, receive, send)
         finally:
             # Clean global stack, when app finish processing request
-            _websocket_ctx_stack.pop()
-            _request_ctx_stack.pop()
-            _app_ctx_stack.pop()
+            _app_ctx_stack.reset(app_token)
+            if req_token:
+                _request_ctx_stack.reset(req_token)
+            if ws_token:
+                _websocket_ctx_stack.reset(ws_token)
 
 
 def create_app(

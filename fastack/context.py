@@ -1,5 +1,11 @@
-from werkzeug.local import LocalStack
+import typing as t
+from contextvars import ContextVar
 
-_app_ctx_stack = LocalStack()
-_request_ctx_stack = LocalStack()
-_websocket_ctx_stack = LocalStack()
+from fastapi import Request, WebSocket
+
+if t.TYPE_CHECKING:
+    from .app import Fastack
+
+_app_ctx_stack: ContextVar["Fastack"] = ContextVar("_app_ctx_stack")
+_request_ctx_stack: ContextVar[Request] = ContextVar("_request_ctx_stack")
+_websocket_ctx_stack: ContextVar[WebSocket] = ContextVar("_websocket_ctx_stack")
