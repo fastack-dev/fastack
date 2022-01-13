@@ -10,23 +10,17 @@ if TYPE_CHECKING:
     from .app import Fastack
 
 
-def _get_state() -> State:
-    """
-    Get state from application or request.
-    """
-
-    state = None
-    if current_app and not request:
-        state = current_app.state
-    elif request:
-        state = request.state
-    return state
+def _get_app() -> "Fastack":
+    app = _app_ctx_stack.top
+    if not app:
+        raise RuntimeError("Working outside of application context.")
+    return app
 
 
-current_app: "Fastack" = LocalProxy(lambda: _app_ctx_stack.top)
+current_app: "Fastack" = LocalProxy(_get_app)
 request: Request = LocalProxy(lambda: _request_ctx_stack.top)
 websocket: WebSocket = LocalProxy(lambda: _websocket_ctx_stack.top)
-state: State = LocalProxy(lambda: _get_state())
+state: State = LocalProxy(lambda: current_app.state)
 
 
 def has_app_context():

@@ -79,7 +79,7 @@ def enable_context(
                     ctx = v
                     break
 
-            app: ASGIApp = None
+            app: ASGIApp
             if ctx is None:
                 app = load_app()
             else:

@@ -7,6 +7,9 @@ class Pagination(metaclass=ABCMeta):
     Abstract class for pagination
     """
 
+    def __init__(self, *args, **kwds) -> None:
+        pass
+
     @abstractmethod
     def paginate(self, data: Sequence) -> Sequence:
         pass

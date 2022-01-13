@@ -23,8 +23,8 @@ def import_attr(module: str) -> Any:
     """
 
     package, attr = module.rsplit(".", 1)
-    module = import_module(package)
-    return getattr(module, attr)
+    mod = import_module(package)
+    return getattr(mod, attr)
 
 
 def load_app() -> "Fastack":
@@ -57,12 +57,16 @@ def lookup_exception_handler(
     Taken from starlette.exceptions.ExceptionMiddleware.
     """
 
+    handler = None
     if isinstance(exc_or_status, Exception):
         for cls in type(exc_or_status).__mro__:
             if cls in exception_handlers:
-                return exception_handlers[cls]
+                handler = exception_handlers[cls]
+                break
     else:
-        return exception_handlers.get(exc_or_status)
+        handler = exception_handlers.get(exc_or_status)
+
+    return handler
 
 
 def url_for(name: str, **params) -> str:
