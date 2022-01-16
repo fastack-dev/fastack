@@ -39,14 +39,16 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
         app = ctx.obj
 
         async def wrapper() -> Any:
+            token = None
             try:
                 async with LifespanManager(app):
-                    _app_ctx_stack.push(app)
+                    token = _app_ctx_stack.set(app)
                     if iscoroutinefunction(func):
                         return await func(*args, **kwds)
                     return func(*args, **kwds)
             finally:
-                _app_ctx_stack.pop()
+                if token:
+                    _app_ctx_stack.reset(token)
 
         return anyio.run(wrapper)
 
@@ -90,12 +92,13 @@ def enable_context(
                 ctx.obj = app
 
             async def executor():
+                token = None
                 try:
                     if callable(initializer):
                         initializer(app)
 
                     async with LifespanManager(app):
-                        _app_ctx_stack.push(app)
+                        token = _app_ctx_stack.set(app)
                         if iscoroutinefunction(func):
                             rv = await func(*args, **kwargs)
                         else:
@@ -106,7 +109,8 @@ def enable_context(
 
                         return rv
                 finally:
-                    _app_ctx_stack.pop()
+                    if token:
+                        _app_ctx_stack.reset(token)
 
             try:
                 loop = asyncio.get_running_loop()
