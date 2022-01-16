@@ -81,7 +81,7 @@ nav:
     - tutorial/introduction.md
     - tutorial/controller.md
     - tutorial/middleware.md
-    - tutorial/context.md
+    - tutorial/globalvariables.md
     - tutorial/cli.md
     - tutorial/plugins.md
 
