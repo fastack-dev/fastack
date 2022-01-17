@@ -17,8 +17,10 @@ The first step you must do before contributing.
 
 ### Clone source code
 
+You need to fork the fastack repository first then clone your repository:
+
 ```
-git clone https://github.com/fastack-dev/fastack.git
+git clone https://github.com/<username>/fastack.git
 cd fastack
 ```
 
@@ -101,13 +103,27 @@ After adding features, commit the changes that have been made. Then publish to y
 !!! note
 
     You will also need to update documentation and unit testing.
+    For the docstring we followed the guide from https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings
 
 ```
 git flow feature publish
 ```
 
-Create pull request
+### Create pull request
 
 !!! warning
 
     Before make a pull request, make sure it's synced with the main fastack repository.
+
+
+## Donate
+
+Want to support fastack?
+
+You can donate your money via:
+
+<a href="https://paypal.me/aprilahijriyan" target='_blank'><img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png"></a>
+
+<a href='https://ko-fi.com/E1E746746' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
+<a href="https://trakteer.id/apriladev/tip" target='_blank'><img height='36' style='border:0px;height:36px;' src="https://trakteer.id/images/mix/navbar-logo-lite-beta.png"></a>
