@@ -197,6 +197,7 @@ def create_app(
     callbacks: Optional[List[BaseRoute]] = None,
     deprecated: Optional[bool] = None,
     include_in_schema: bool = True,
+    swagger_ui_parameters: Optional[Dict[str, Any]] = None,
     **extra: Any,
 ):
     """
@@ -238,6 +239,7 @@ def create_app(
         callbacks=callbacks,
         deprecated=deprecated,
         include_in_schema=include_in_schema,
+        swagger_ui_parameters=swagger_ui_parameters,
         **extra,
     )
     app.add_middleware(StateMiddleware)
