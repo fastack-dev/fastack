@@ -37,11 +37,13 @@ class MiddlewareManager:
         Process request middleware.
 
         Args:
-            func (Callable): Function to be called before request.
+            func: Function to be called before request.
 
         Example:
 
         ```python
+        from fastapi import Request
+
         @app.middleware.process_request
         def process_request(request):
             print("Processing request")
@@ -59,13 +61,15 @@ class MiddlewareManager:
         Process response middleware.
 
         Args:
-            func (Callable): Function to be called after request.
+            func: Function to be called after request.
 
         Example:
 
         ```python
+        from fastapi import Response
+
         @app.middleware.process_response
-        def process_response(response, exc):
+        def process_response(response: Response, exc: Exception = None):
             print("Processing response")
             success = "1" if exc is None else "0"
             response.headers["X-Success"] = success
@@ -78,13 +82,16 @@ class MiddlewareManager:
         """
         Process websocket middleware.
 
-        :param func: Function to be called before the request to WebSocket.
+        Args:
+            func: Function to be called before the request to WebSocket.
 
         Example:
 
         ```python
+        from fastapi import WebSocket
+
         @app.middleware.process_websocket
-        def process_websocket(websocket):
+        def process_websocket(websocket: WebSocket):
             print("Processing websocket")
             # websocket.accept()
         ```

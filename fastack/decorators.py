@@ -56,14 +56,16 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
 
 
 def enable_context(
-    initializer: Callable = None, finalizer: Callable = None
+    initializer: Callable[[ASGIApp], Any] = None,
+    finalizer: Callable[[ASGIApp, Any], Any] = None,
 ) -> Callable:
     """
     A decorator that activates the application context
     The function can be a coroutine or a normal function.
 
-    :param initializer: The function to be called before application context starts.
-    :param finalizer: The function that will be called after your function is called.
+    Args:
+        initializer: The function to be called before application context starts.
+        finalizer: The function that will be called after your function is called.
 
     notes:
         - The initializer will accept one argument. ``initializer(app)`` where ``app`` is the application.

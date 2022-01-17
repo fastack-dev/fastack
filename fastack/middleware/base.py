@@ -102,8 +102,12 @@ class BaseMiddleware(BaseHTTPMiddleware):
         """
         Process the response
 
-        :param response: The response object
-        :param exc: The exception object if error occured
+        Args:
+            response: The response object
+            exc: The exception object if error occured
+
+        Notes:
+            The exception is always ``None`` when you use functions as middleware.
         """
 
     async def process_websocket(self, websocket: WebSocket):
