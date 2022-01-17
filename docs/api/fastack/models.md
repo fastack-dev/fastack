@@ -1,0 +1,2 @@
+# fastack.models
+::: fastack.models

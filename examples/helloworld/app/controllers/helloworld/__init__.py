@@ -1,4 +1,5 @@
 from app.plugins.globalvar import say_hello
+from app.plugins.logger import log
 from fastapi import Response
 from pydantic import conint
 
@@ -16,7 +17,7 @@ class HelloWorldController(ReadOnlyController):
 
     def say_hello(self):
         if say_hello:
-            print("Hello there!")
+            log.debug("Hello there!")
 
     @route(response_model=PaginatedModel[HelloWorldModel])
     def list(self, page: conint(gt=0) = 1, page_size: conint(gt=0) = 10) -> Response:

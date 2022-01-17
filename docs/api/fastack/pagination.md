@@ -1,0 +1,2 @@
+# fastack.pagination
+::: fastack.pagination

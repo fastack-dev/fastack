@@ -17,9 +17,11 @@ def import_attr(module: str) -> Any:
     """
     Import attributes from a module.
 
-    :param module: Module name (e.g. "os.path")
+    Args:
+        module: Module name (e.g. "os.path")
 
-    :return: Imported attributes
+    Returns:
+        Any: Imported attributes
     """
 
     package, attr = module.rsplit(".", 1)
@@ -69,12 +71,13 @@ def lookup_exception_handler(
     return handler
 
 
-def url_for(name: str, **params) -> str:
+def url_for(name: str, **params: Dict[str, Any]) -> str:
     """
     Generate absolute URL for an endpoint.
 
-    :param name: Name of the endpoint.
-    :param params: Can be path parameters or query parameters.
+    Args:
+        name: Name of the endpoint.
+        params: Can be path parameters or query parameters.
     """
 
     path_params = {}

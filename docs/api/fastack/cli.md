@@ -1,0 +1,2 @@
+# fastack.cli
+::: fastack.cli

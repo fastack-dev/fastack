@@ -9,13 +9,18 @@ plugins:
   - git-revision-date-localized:
       type: datetime
       fallback_to_build_date: true
+  - mkdocstrings:
+      watch:
+        - fastack/
+  - include_dir_to_nav
 
 theme:
   name: material
   language: en
   features:
     - navigation.indexes
-    - toc.integrate
+    - navigation.tracking
+    # - toc.integrate
     - content.code.annotate
 
   icon:
@@ -66,6 +71,8 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
   - admonition
   - pymdownx.details
   - pymdownx.magiclink
@@ -81,7 +88,7 @@ nav:
     - tutorial/introduction.md
     - tutorial/controller.md
     - tutorial/middleware.md
-    - tutorial/context.md
+    - tutorial/globalvariables.md
     - tutorial/cli.md
     - tutorial/plugins.md
 
@@ -89,3 +96,4 @@ nav:
   - plugins.md
   - contributing.md
   - support.md
+  - "API Reference": api

@@ -37,7 +37,8 @@ class Fastack(FastAPI):
         """
         Set settings for the application.
 
-        :param settings: settings module
+        Args:
+            settings (ModuleType): settings module
         """
 
         self.state.settings = settings
@@ -102,7 +103,8 @@ class Fastack(FastAPI):
         """
         Include controller to the application.
 
-        :param controller: Controller instance
+        Args:
+            controller (Controller): Controller instance
 
         For other parameters, please see the documentation of ``fastapi.APIRouter.add_api_route``.
         """

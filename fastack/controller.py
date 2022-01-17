@@ -51,28 +51,28 @@ class Controller:
     ```
 
     Attributes:
-        - name: Name of the controller. If not provided, the name of the class will be used.
-        - url_prefix: URL prefix of the controller. If not provided, the name of the controller will be used.
-        - mapping_endpoints: Mapping to get default path.
-        - method_endpoints: Mapping to get default HTTP method.
-        - middlewares: List of middlewares (dependencies) to be applied to all routes.
+        name: Name of the controller. If not provided, the name of the class will be used.
+        url_prefix: URL prefix of the controller. If not provided, the name of the controller will be used.
+        mapping_endpoints: Mapping to get default path.
+        method_endpoints: Mapping to get default HTTP method.
+        middlewares: List of middlewares (dependencies) to be applied to all routes.
 
     """
 
     name: Optional[str] = None
     url_prefix: Optional[str] = None
-    mapping_endpoints = MAPPING_ENDPOINTS
-    method_endpoints = METHOD_ENDPOINTS
+    mapping_endpoints: Dict[str, str] = MAPPING_ENDPOINTS
+    method_endpoints: Dict[str, str] = METHOD_ENDPOINTS
     middlewares: Optional[Sequence[params.Depends]] = []
 
     def get_endpoint_name(self) -> str:
         """
         Get the name of the controller.
-        This will be used to prefix the endpoint name (eg user)
+        This will be used to prefix the endpoint name (e.g user)
         when you create the absolute path of an endpoint using ``request.url_for``
         it looks like this ``request.url_for('user:get')``
 
-        ``get`` here is the method name (responder) so you can replace it according to the method name
+        ``get`` here is the method name (responder) so you cDict[str, str]an replace it according to the method name
         such as ``post``, ``put``, ``delete``, ``retrieve``, etc.
 
         Returns:
@@ -99,12 +99,13 @@ class Controller:
         self.name = rv.lower()
         return name
 
-    def url_for(self, name: str, **params) -> str:
+    def url_for(self, name: str, **params: Dict[str, Any]) -> str:
         """
         Generate absolute URL for an endpoint.
 
-        :param name: Method name (e.g. retrieve).
-        :param params: Can be path parameters or query parameters.
+        Args:
+            name: Method name (e.g. retrieve).
+            params: Can be path parameters or query parameters.
         """
 
         endpoint_name = self.join_endpoint_name(name)
@@ -129,7 +130,8 @@ class Controller:
         """
         Get the path of an endpoint.
 
-        :param method: Name of the method.
+        Args:
+            method: Name of the method.
         """
 
         return self.mapping_endpoints.get(method) or ""
@@ -138,13 +140,17 @@ class Controller:
         """
         Get the HTTP method of an endpoint.
 
-        :param method: Name of the method.
+        Args:
+            method: Name of the method.
         """
         return self.method_endpoints.get(method) or None
 
     def join_endpoint_name(self, name: str) -> str:
         """
         Join endpoint name with controller name.
+
+        Args:
+            name: Name of the method.
         """
 
         return self.get_endpoint_name() + ":" + name
@@ -270,12 +276,13 @@ class Controller:
         }
         ```
 
-        :param detail: Detail of the response.
-        :param data: Data to be serialized.
-        :param status: HTTP status code.
-        :param headers: HTTP headers.
-        :param allow_empty: Allows blank data to be shown to frontend.
-        :param kwargs: Additional arguments to be passed to the JSONResponse.
+        Args:
+            detail: Detail of the response.
+            data: Data to be serialized.
+            status: HTTP status code.
+            headers: HTTP headers.
+            allow_empty: Allows blank data to be shown to frontend.
+            **kwargs (optional): Additional arguments to be passed to the JSONResponse.
         """
 
         content = {"detail": detail}
@@ -304,7 +311,7 @@ class ListController(Controller):
     Controller for listing data.
 
     Attributes:
-        - `pagination_class`: Class to be used for pagination.
+        pagination_class: Class to be used for pagination.
     """
 
     pagination_class: Type[Pagination] = PageNumberPagination
@@ -313,9 +320,10 @@ class ListController(Controller):
         """
         Paginate data.
 
-        :param data: Data to be paginated.
-        :param page: Page number.
-        :param page_size: Page size.
+        Args:
+            data: Data to be paginated.
+            page: Page number.
+            page_size: Page size.
 
         """
 
@@ -342,8 +350,9 @@ class ListController(Controller):
         """
         Get total pages.
 
-        :param total: Total data.
-        :param page_size: Page size.
+        Args:
+            total: Total data.
+            page_size: Page size.
         """
 
         if total == 0:
@@ -374,12 +383,13 @@ class ListController(Controller):
         """
         Return a paginated response.
 
-        :param data: Data to be paginated.
-        :param page: Page number.
-        :param page_size: Page size.
-        :param status: HTTP status code.
-        :param headers: HTTP headers.
-        :param kwargs: Additional arguments to be passed to the JSONResponse.
+        Args:
+            data: Data to be paginated.
+            page: Page number.
+            page_size: Page size.
+            status: HTTP status code.
+            headers: HTTP headers.
+            **kwargs (optional): Additional arguments to be passed to the JSONResponse.
         """
 
         total = self.get_total_data(data)
