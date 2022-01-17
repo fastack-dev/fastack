@@ -1,0 +1,2 @@
+# fastack.app
+::: fastack.app

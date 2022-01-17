@@ -143,3 +143,35 @@ what the `enable_context` decorator does here is:
 
 1. Pushes the app instance object to the local context, which allows you to access it from `fastack.globals.current_app`.
 2. Triggers `startup` and `shutdown` events in the application and allows you to access all plugins that are initialized at `startup` event via `fastack.globals.state`.
+
+
+## Adding a global command using the entry point
+
+We also support adding commands from global to the `fastack` CLI. This feature is also inspired by flask.
+
+You can add global commands using the `fastack.commands` entry point group. First you have to create a python module or package, then configure the entry point as below:
+
+=== "setup.py"
+
+    ```py
+    setup(
+      ...,
+      entry_points={
+          'fastack.commands': [
+              'awesome = awesome.cli:awesome_command',
+          ],
+      },
+    )
+    ```
+
+=== "pyproject.toml (python-poetry)"
+
+    ```toml
+    [tool.poetry.plugins."fastack.commands"]
+    awesome = "awesome.cli:awesome_command"
+    ```
+
+For more information about entry points, please visit the link below:
+
+* https://stackoverflow.com/questions/774824/explain-python-entry-points
+* https://setuptools.pypa.io/en/latest/pkg_resources.html#entry-points

@@ -1,0 +1,2 @@
+# fastack.constants
+::: fastack.constants

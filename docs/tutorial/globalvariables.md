@@ -65,14 +65,14 @@ Now you no longer need to use the `request` object on a responder, because we ha
 
 For example:
 
-```py title="app/controllers/helloworld/__init__.py" linenums="1" hl_lines="7 25 34"
+```py title="app/controllers/helloworld/__init__.py" linenums="1" hl_lines="9 27 36"
 --8<-- "examples/helloworld/app/controllers/helloworld/__init__.py"
 ```
 
 Line:
 
-* `7` - We import the global `request` object
-* `15` and `34` - We use the `url_for` method in the `request` object to generate absolute url.
+* `9` - We import the global `request` object
+* `27` and `36` - We use the `url_for` method in the `request` object to generate absolute url.
 
 ## WebSocket
 
@@ -97,7 +97,7 @@ You can also access websocket connections globally via `fastack.globals.websocke
         await websocket.close()
     ```
 
-    When you send data to client using websocket object from typing hint, it won't work because in websocket middleware *we allow all incoming connections* and *use websocket object from global*, while *websocket from typing hint in responder connection status is still not connected* (out of sync with object global)
+    When you send data to client using websocket object from typing hint, it won't work because in websocket middleware *we allow all incoming connections* and *use websocket object from global*, while *websocket from typing hint in responder connection status is still not connected* (out of sync with global object)
 
     The example below should work fine.
 
@@ -123,7 +123,7 @@ First, thanks to [werkzeug.local](https://werkzeug.palletsprojects.com/en/2.0.x/
 
 It's simpler than you think (maybe :D). Basically a web framework is an object that can be called and accept requests that are forwarded by the web server.
 
-This is the main point, we save the app object instance to local context using API from `contextvars.ContextVar` and also `werkzeug.local.LocalProxy` to access objects stored in local context.
+This is the main point, we save the app instance to local context using API from `contextvars.ContextVar` and also `werkzeug.local.LocalProxy` to access objects stored in local context.
 
 For more details, please see the documentation directly:
 
