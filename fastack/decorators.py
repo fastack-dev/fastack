@@ -39,14 +39,16 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
         app = ctx.obj
 
         async def wrapper() -> Any:
+            token = None
             try:
                 async with LifespanManager(app):
-                    _app_ctx_stack.push(app)
+                    token = _app_ctx_stack.set(app)
                     if iscoroutinefunction(func):
                         return await func(*args, **kwds)
                     return func(*args, **kwds)
             finally:
-                _app_ctx_stack.pop()
+                if token:
+                    _app_ctx_stack.reset(token)
 
         return anyio.run(wrapper)
 
@@ -54,14 +56,16 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
 
 
 def enable_context(
-    initializer: Callable = None, finalizer: Callable = None
+    initializer: Callable[[ASGIApp], Any] = None,
+    finalizer: Callable[[ASGIApp, Any], Any] = None,
 ) -> Callable:
     """
     A decorator that activates the application context
     The function can be a coroutine or a normal function.
 
-    :param initializer: The function to be called before application context starts.
-    :param finalizer: The function that will be called after your function is called.
+    Args:
+        initializer: The function to be called before application context starts.
+        finalizer: The function that will be called after your function is called.
 
     notes:
         - The initializer will accept one argument. ``initializer(app)`` where ``app`` is the application.
@@ -79,7 +83,7 @@ def enable_context(
                     ctx = v
                     break
 
-            app: ASGIApp = None
+            app: ASGIApp
             if ctx is None:
                 app = load_app()
             else:
@@ -90,12 +94,13 @@ def enable_context(
                 ctx.obj = app
 
             async def executor():
+                token = None
                 try:
                     if callable(initializer):
                         initializer(app)
 
                     async with LifespanManager(app):
-                        _app_ctx_stack.push(app)
+                        token = _app_ctx_stack.set(app)
                         if iscoroutinefunction(func):
                             rv = await func(*args, **kwargs)
                         else:
@@ -106,7 +111,8 @@ def enable_context(
 
                         return rv
                 finally:
-                    _app_ctx_stack.pop()
+                    if token:
+                        _app_ctx_stack.reset(token)
 
             try:
                 loop = asyncio.get_running_loop()

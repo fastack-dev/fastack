@@ -1,8 +1,10 @@
+from contextvars import Token
 from types import ModuleType
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Sequence, Type, Union
 
-from fastapi import Depends, FastAPI, Request, WebSocket, params, routing
+from fastapi import FastAPI, Request, WebSocket, params
 from fastapi.datastructures import Default
+from fastapi.params import Depends
 from fastapi.responses import JSONResponse, Response
 from fastapi.routing import APIRoute
 from starlette.middleware import Middleware
@@ -35,7 +37,8 @@ class Fastack(FastAPI):
         """
         Set settings for the application.
 
-        :param settings: settings module
+        Args:
+            settings (ModuleType): settings module
         """
 
         self.state.settings = settings
@@ -60,9 +63,9 @@ class Fastack(FastAPI):
         Load plugins from settings.
         """
 
-        for plugin in self.get_setting("PLUGINS", []):
-            plugin += ".setup"
-            plugin = import_attr(plugin)
+        for plugin_str in self.get_setting("PLUGINS", []):
+            plugin_str += ".setup"
+            plugin = import_attr(plugin_str)
             plugin(self)
 
     def load_commands(self):
@@ -70,8 +73,8 @@ class Fastack(FastAPI):
         Load commands from settings.
         """
 
-        for command in self.get_setting("COMMANDS", []):
-            command: Union[Callable, Typer] = import_attr(command)
+        for command_str in self.get_setting("COMMANDS", []):
+            command: Union[Callable, Typer] = import_attr(command_str)
             if isinstance(command, Typer):
                 self.cli.add_typer(command)
             else:
@@ -87,7 +90,7 @@ class Fastack(FastAPI):
         default_response_class: Type[Response] = Default(JSONResponse),
         responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
         callbacks: Optional[List[BaseRoute]] = None,
-        routes: Optional[List[routing.BaseRoute]] = None,
+        routes: Optional[List[BaseRoute]] = None,
         redirect_slashes: bool = True,
         default: Optional[ASGIApp] = None,
         dependency_overrides_provider: Optional[Any] = None,
@@ -100,7 +103,8 @@ class Fastack(FastAPI):
         """
         Include controller to the application.
 
-        :param controller: Controller instance
+        Args:
+            controller (Controller): Controller instance
 
         For other parameters, please see the documentation of ``fastapi.APIRouter.add_api_route``.
         """
@@ -128,31 +132,35 @@ class Fastack(FastAPI):
         self.include_router(router)
 
     @property
-    def middleware(self) -> MiddlewareManager:
+    def middleware(self) -> MiddlewareManager:  # type: ignore[override]
         return MiddlewareManager(self)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        req_token: Optional[Token] = None
+        ws_token: Optional[Token] = None
         try:
             # Add the app instance to the global stack, so you can access it globally via ``fastack.globals.current_app``
-            _app_ctx_stack.push(self)
+            app_token: Token = _app_ctx_stack.set(self)
             scope_type = scope["type"]
             # If the scope is http we will create a request instance object and add it to the global stack,
             # so that it can be accessed via ``fastack.globals.request``
             if scope_type == "http":
                 request = Request(scope, receive)
-                _request_ctx_stack.push(request)
+                req_token = _request_ctx_stack.set(request)
 
             # Same as above, but for websocket
             elif scope_type == "websocket":
                 websocket = WebSocket(scope, receive, send)
-                _websocket_ctx_stack.push(websocket)
+                ws_token = _websocket_ctx_stack.set(websocket)
 
             await super().__call__(scope, receive, send)
         finally:
             # Clean global stack, when app finish processing request
-            _websocket_ctx_stack.pop()
-            _request_ctx_stack.pop()
-            _app_ctx_stack.pop()
+            _app_ctx_stack.reset(app_token)
+            if req_token:
+                _request_ctx_stack.reset(req_token)
+            if ws_token:
+                _websocket_ctx_stack.reset(ws_token)
 
 
 def create_app(
@@ -189,6 +197,7 @@ def create_app(
     callbacks: Optional[List[BaseRoute]] = None,
     deprecated: Optional[bool] = None,
     include_in_schema: bool = True,
+    swagger_ui_parameters: Optional[Dict[str, Any]] = None,
     **extra: Any,
 ):
     """
@@ -230,6 +239,7 @@ def create_app(
         callbacks=callbacks,
         deprecated=deprecated,
         include_in_schema=include_in_schema,
+        swagger_ui_parameters=swagger_ui_parameters,
         **extra,
     )
     app.add_middleware(StateMiddleware)

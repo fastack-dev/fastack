@@ -93,8 +93,8 @@ class Command(Typer):
         for cmd in cli.registered_commands:
             found = False
             for idx, old in enumerate(self.registered_commands):
-                old_name = old.name or old.callback.__name__
-                cmd_name = cmd.name or cmd.callback.__name__
+                old_name = old.name or old.callback.__name__  # type: ignore[union-attr]
+                cmd_name = cmd.name or cmd.callback.__name__  # type: ignore[union-attr]
                 if old_name == cmd_name:
                     self.registered_commands[idx] = cmd
                     found = True
@@ -109,8 +109,8 @@ class Command(Typer):
                 continue
 
             found = False
-            for idx, old in enumerate(self.registered_groups):
-                old_name = get_group_name(old) or group.name
+            for idx, old in enumerate(self.registered_groups):  # type: ignore[assignment]
+                old_name = get_group_name(old) or group.name  # type: ignore[arg-type]
                 if old_name == group_name:
                     self.registered_groups[idx] = group
                     found = True

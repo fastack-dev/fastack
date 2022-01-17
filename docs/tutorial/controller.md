@@ -124,6 +124,8 @@ For now all controller types are used only as mixins. But in future, it will sup
 
 This is the controller base for all controller types.
 
+For more details, see [API Reference][fastack.controller]
+
 ### CreateController
 
 Controller to add data

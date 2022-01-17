@@ -17,14 +17,16 @@ def import_attr(module: str) -> Any:
     """
     Import attributes from a module.
 
-    :param module: Module name (e.g. "os.path")
+    Args:
+        module: Module name (e.g. "os.path")
 
-    :return: Imported attributes
+    Returns:
+        Any: Imported attributes
     """
 
     package, attr = module.rsplit(".", 1)
-    module = import_module(package)
-    return getattr(module, attr)
+    mod = import_module(package)
+    return getattr(mod, attr)
 
 
 def load_app() -> "Fastack":
@@ -57,20 +59,25 @@ def lookup_exception_handler(
     Taken from starlette.exceptions.ExceptionMiddleware.
     """
 
+    handler = None
     if isinstance(exc_or_status, Exception):
         for cls in type(exc_or_status).__mro__:
             if cls in exception_handlers:
-                return exception_handlers[cls]
+                handler = exception_handlers[cls]
+                break
     else:
-        return exception_handlers.get(exc_or_status)
+        handler = exception_handlers.get(exc_or_status)
+
+    return handler
 
 
-def url_for(name: str, **params) -> str:
+def url_for(name: str, **params: Dict[str, Any]) -> str:
     """
     Generate absolute URL for an endpoint.
 
-    :param name: Name of the endpoint.
-    :param params: Can be path parameters or query parameters.
+    Args:
+        name: Name of the endpoint.
+        params: Can be path parameters or query parameters.
     """
 
     path_params = {}

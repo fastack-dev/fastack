@@ -1,12 +1,12 @@
 from types import MethodType
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
-from fastapi import APIRouter, params, routing
+from fastapi import APIRouter, Query, params
 from fastapi.datastructures import Default
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 from fastapi.routing import APIRoute
-from pydantic import BaseModel, conint
+from pydantic import BaseModel
 from starlette.routing import BaseRoute
 from starlette.types import ASGIApp
 
@@ -51,28 +51,28 @@ class Controller:
     ```
 
     Attributes:
-        - name: Name of the controller. If not provided, the name of the class will be used.
-        - url_prefix: URL prefix of the controller. If not provided, the name of the controller will be used.
-        - mapping_endpoints: Mapping to get default path.
-        - method_endpoints: Mapping to get default HTTP method.
-        - middlewares: List of middlewares (dependencies) to be applied to all routes.
+        name: Name of the controller. If not provided, the name of the class will be used.
+        url_prefix: URL prefix of the controller. If not provided, the name of the controller will be used.
+        mapping_endpoints: Mapping to get default path.
+        method_endpoints: Mapping to get default HTTP method.
+        middlewares: List of middlewares (dependencies) to be applied to all routes.
 
     """
 
-    name: str = None
-    url_prefix: str = None
-    mapping_endpoints = MAPPING_ENDPOINTS
-    method_endpoints = METHOD_ENDPOINTS
-    middlewares: Optional[Sequence[params.Depends]] = None
+    name: Optional[str] = None
+    url_prefix: Optional[str] = None
+    mapping_endpoints: Dict[str, str] = MAPPING_ENDPOINTS
+    method_endpoints: Dict[str, str] = METHOD_ENDPOINTS
+    middlewares: Optional[Sequence[params.Depends]] = []
 
     def get_endpoint_name(self) -> str:
         """
         Get the name of the controller.
-        This will be used to prefix the endpoint name (eg user)
+        This will be used to prefix the endpoint name (e.g user)
         when you create the absolute path of an endpoint using ``request.url_for``
         it looks like this ``request.url_for('user:get')``
 
-        ``get`` here is the method name (responder) so you can replace it according to the method name
+        ``get`` here is the method name (responder) so you cDict[str, str]an replace it according to the method name
         such as ``post``, ``put``, ``delete``, ``retrieve``, etc.
 
         Returns:
@@ -99,12 +99,13 @@ class Controller:
         self.name = rv.lower()
         return name
 
-    def url_for(self, name: str, **params) -> str:
+    def url_for(self, name: str, **params: Dict[str, Any]) -> str:
         """
         Generate absolute URL for an endpoint.
 
-        :param name: Method name (e.g. retrieve).
-        :param params: Can be path parameters or query parameters.
+        Args:
+            name: Method name (e.g. retrieve).
+            params: Can be path parameters or query parameters.
         """
 
         endpoint_name = self.join_endpoint_name(name)
@@ -129,7 +130,8 @@ class Controller:
         """
         Get the path of an endpoint.
 
-        :param method: Name of the method.
+        Args:
+            method: Name of the method.
         """
 
         return self.mapping_endpoints.get(method) or ""
@@ -138,13 +140,17 @@ class Controller:
         """
         Get the HTTP method of an endpoint.
 
-        :param method: Name of the method.
+        Args:
+            method: Name of the method.
         """
         return self.method_endpoints.get(method) or None
 
     def join_endpoint_name(self, name: str) -> str:
         """
         Join endpoint name with controller name.
+
+        Args:
+            name: Name of the method.
         """
 
         return self.get_endpoint_name() + ":" + name
@@ -158,7 +164,7 @@ class Controller:
         default_response_class: Type[Response] = Default(JSONResponse),
         responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
         callbacks: Optional[List[BaseRoute]] = None,
-        routes: Optional[List[routing.BaseRoute]] = None,
+        routes: Optional[List[BaseRoute]] = None,
         redirect_slashes: bool = True,
         default: Optional[ASGIApp] = None,
         dependency_overrides_provider: Optional[Any] = None,
@@ -183,7 +189,7 @@ class Controller:
         if not dependencies:
             dependencies = []
 
-        dependencies = dependencies + (self.middlewares or [])
+        dependencies = dependencies + (self.middlewares or [])  # type: ignore[operator]
         router = APIRouter(
             prefix=prefix,
             tags=tags,
@@ -207,7 +213,7 @@ class Controller:
             if method_name.startswith("_") or not isinstance(func, MethodType):
                 continue
 
-            http_method = method_name.upper()
+            http_method: Optional[str] = method_name.upper()
             if http_method not in HTTP_METHODS:
                 http_method = self.get_http_method(method_name)
 
@@ -244,15 +250,18 @@ class Controller:
         By default it will use the "serialize" method on the object to convert the data.
         """
 
-        return obj.serialize()
+        func = getattr(obj, "serialize", None)
+        if callable(func):
+            obj = func()
+        return obj
 
     def json(
         self,
         detail: str,
-        data: Union[dict, list, object] = None,
+        data: Optional[Union[dict, list, object]] = None,
         *,
         status: int = 200,
-        headers: dict = None,
+        headers: Optional[dict] = None,
         allow_empty: bool = True,
         **kwargs: Any,
     ) -> JSONResponse:
@@ -267,19 +276,18 @@ class Controller:
         }
         ```
 
-        :param detail: Detail of the response.
-        :param data: Data to be serialized.
-        :param status: HTTP status code.
-        :param headers: HTTP headers.
-        :param allow_empty: Allows blank data to be shown to frontend.
-        :param kwargs: Additional arguments to be passed to the JSONResponse.
+        Args:
+            detail: Detail of the response.
+            data: Data to be serialized.
+            status: HTTP status code.
+            headers: HTTP headers.
+            allow_empty: Allows blank data to be shown to frontend.
+            **kwargs (optional): Additional arguments to be passed to the JSONResponse.
         """
 
         content = {"detail": detail}
         if data or allow_empty:
-            if hasattr(data, "serialize"):
-                data = self.serialize_data(data)
-
+            data = self.serialize_data(data)
             content["data"] = jsonable_encoder(data)
 
         return JSONResponse(content, status_code=status, headers=headers, **kwargs)
@@ -303,7 +311,7 @@ class ListController(Controller):
     Controller for listing data.
 
     Attributes:
-        - `pagination_class`: Class to be used for pagination.
+        pagination_class: Class to be used for pagination.
     """
 
     pagination_class: Type[Pagination] = PageNumberPagination
@@ -312,9 +320,10 @@ class ListController(Controller):
         """
         Paginate data.
 
-        :param data: Data to be paginated.
-        :param page: Page number.
-        :param page_size: Page size.
+        Args:
+            data: Data to be paginated.
+            page: Page number.
+            page_size: Page size.
 
         """
 
@@ -323,9 +332,7 @@ class ListController(Controller):
 
         results = []
         for o in data:
-            if hasattr(o, "serialize"):
-                o = self.serialize_data(o)
-
+            o = self.serialize_data(o)
             o = jsonable_encoder(o)
             results.append(o)
 
@@ -343,8 +350,9 @@ class ListController(Controller):
         """
         Get total pages.
 
-        :param total: Total data.
-        :param page_size: Page size.
+        Args:
+            total: Total data.
+            page_size: Page size.
         """
 
         if total == 0:
@@ -369,29 +377,30 @@ class ListController(Controller):
         page_size: int = 10,
         *,
         status: int = 200,
-        headers: dict = None,
+        headers: Optional[dict] = None,
         **kwargs: Any,
     ) -> JSONResponse:
         """
         Return a paginated response.
 
-        :param data: Data to be paginated.
-        :param page: Page number.
-        :param page_size: Page size.
-        :param status: HTTP status code.
-        :param headers: HTTP headers.
-        :param kwargs: Additional arguments to be passed to the JSONResponse.
+        Args:
+            data: Data to be paginated.
+            page: Page number.
+            page_size: Page size.
+            status: HTTP status code.
+            headers: HTTP headers.
+            **kwargs (optional): Additional arguments to be passed to the JSONResponse.
         """
 
         total = self.get_total_data(data)
         pages = self.get_total_page(total, page_size)
         prev_page = page - 1
         if prev_page < 1:
-            prev_page = None
+            prev_page = None  # type: ignore[assignment]
 
         next_page = page + 1
         if next_page not in pages:
-            next_page = None
+            next_page = None  # type: ignore[assignment]
 
         content = {
             "total": total,
@@ -400,7 +409,9 @@ class ListController(Controller):
         }
         return JSONResponse(content, status_code=status, headers=headers, **kwargs)
 
-    def list(self, page: conint(gt=0) = 1, page_size: conint(gt=0) = 10) -> Response:
+    def list(
+        self, page: int = Query(1, gt=0), page_size: int = Query(10, gt=0)
+    ) -> Response:
         """
         List data.
         """

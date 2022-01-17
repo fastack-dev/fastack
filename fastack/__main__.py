@@ -1,11 +1,11 @@
-import nest_asyncio  # noqa
+import nest_asyncio  # type: ignore[import] # noqa
 
 nest_asyncio.apply()
 
 from typing import List, Union
 
-import uvicorn
-from cookiecutter.main import cookiecutter
+import uvicorn  # type: ignore[import]
+from cookiecutter.main import cookiecutter  # type: ignore[import]
 from fastapi.routing import APIRoute, APIWebSocketRoute
 from typer import Argument, Option, echo
 

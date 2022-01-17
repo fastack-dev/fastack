@@ -1,0 +1,2 @@
+# fastack.decorators
+::: fastack.decorators
