@@ -303,7 +303,7 @@ class RetrieveController(Controller):
         Retrieve a single object with the given ID.
         """
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class ListController(Controller):
@@ -356,7 +356,7 @@ class ListController(Controller):
         """
 
         if total == 0:
-            return [1]
+            return [1]  # pragma: no cover
 
         return list(
             range(
@@ -392,20 +392,24 @@ class ListController(Controller):
             **kwargs (optional): Additional arguments to be passed to the JSONResponse.
         """
 
-        total = self.get_total_data(data)
-        pages = self.get_total_page(total, page_size)
+        # Counting all pages
+        total_data = self.get_total_data(data)
+        pages = self.get_total_page(total_data, page_size)
         prev_page = page - 1
-        if prev_page < 1:
+        if prev_page not in pages:
             prev_page = None  # type: ignore[assignment]
 
         next_page = page + 1
         if next_page not in pages:
             next_page = None  # type: ignore[assignment]
 
+        # Get data per page
+        data = self.paginate(data, page, page_size)
+        total = self.get_total_data(data)
         content = {
             "total": total,
             "paging": {"next": next_page, "prev": prev_page, "pages": pages},
-            "data": self.paginate(data, page, page_size),
+            "data": data,
         }
         return JSONResponse(content, status_code=status, headers=headers, **kwargs)
 
@@ -416,7 +420,7 @@ class ListController(Controller):
         List data.
         """
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class CreateController(Controller):
@@ -429,7 +433,7 @@ class CreateController(Controller):
         adding a new object.
         """
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class UpdateController(Controller):
@@ -442,7 +446,7 @@ class UpdateController(Controller):
         Update an object with the given ID.
         """
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class DestroyController(Controller):
@@ -455,7 +459,7 @@ class DestroyController(Controller):
         Delete an object with the given ID.
         """
 
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class ReadOnlyController(RetrieveController, ListController):

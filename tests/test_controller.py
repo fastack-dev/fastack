@@ -3,7 +3,7 @@ from typing import Callable
 import pytest
 from fastapi.testclient import TestClient
 
-from fastack import Fastack
+from fastack import Controller, Fastack
 from tests.resources.controllers import CustomController, UserController
 
 
@@ -18,7 +18,7 @@ def test_controller(
     app: Fastack,
     client: TestClient,
     urljoin: Callable,
-    controller,
+    controller: Controller,
     url_prefix: str,
     get_endpoint: str,
 ):

@@ -1,5 +1,8 @@
+import time
+
 from fastapi import Request, Response, WebSocket
 from fastapi.testclient import TestClient
+from starlette.middleware.base import RequestResponseEndpoint
 
 from fastack import Fastack
 from fastack.globals import websocket
@@ -40,3 +43,14 @@ def test_middleware(app: Fastack, client: TestClient):
 
     with client.websocket_connect("/ws") as ws:
         assert ws.receive_json() == {"hello": "world"}
+
+    @app.middleware("http")
+    async def on_http_request(request: Request, call_next: RequestResponseEndpoint):
+        start_time = time.time()
+        response = await call_next(request)
+        process_time = time.time() - start_time
+        response.headers["X-Process-Time"] = str(process_time)
+        return response
+
+    resp = client.get("/")
+    assert "X-Process-Time" in resp.headers

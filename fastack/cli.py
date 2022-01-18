@@ -3,8 +3,7 @@ from typing import Any, Callable, Dict, Optional, Type, Union
 import click
 from pkg_resources import get_distribution, iter_entry_points
 from typer import Context, Exit, Option, Typer, echo
-from typer.main import get_group_name
-from typer.models import Default
+from typer.models import CommandInfo, Default
 
 from .app import Fastack
 from .utils import load_app
@@ -58,7 +57,7 @@ class Command(Typer):
             deprecated=deprecated,
             add_completion=add_completion,
         )
-        self.app: Union[Fastack, None] = load_app()
+        self.app: Union[Fastack, None] = load_app(raise_error=False)
         self.load_commands()
 
     def init(
@@ -84,37 +83,66 @@ class Command(Typer):
             if isinstance(cmd, Typer):
                 self.add_typer(cmd)
             else:
-                self.command(ep.name)(cmd)
+                self.merge_command(cmd, name=ep.name)
 
         if self.app is not None:
             self.merge(self.app.cli)
 
-    def merge(self, cli: Typer):
-        for cmd in cli.registered_commands:
+    def merge_command(self, command: Union[Callable, CommandInfo], *, name: str = None):
+        if isinstance(command, CommandInfo):
+            cmd_name = name or command.name
+            command_info = command
+        else:
+            cmd_name = name or command.__name__
+            command_info: Optional[CommandInfo] = getattr(
+                command, "__command_info__", None
+            )
+            if command_info is None:
+                command_info = CommandInfo(
+                    name=cmd_name,
+                    callback=command,
+                )
+            else:
+                cmd_name = name or command_info.name or command.__name__
+
+        if not isinstance(command_info, CommandInfo):  # pragma: no cover
+            raise TypeError(f"Invalid command info type on {command!r}")
+
+        found = False
+        for idx, old in enumerate(self.registered_commands):
+            old_name = old.name
+            if not old_name:
+                old_name = old.callback.__name__
+
+            if old_name and old_name == cmd_name:
+                self.registered_commands[idx] = command_info
+                found = True
+                break
+
+        if not found:
+            self.registered_commands.append(command_info)
+
+    def merge_typer(self, typer: Typer):
+        for group in typer.registered_groups:
+            group_name = group.typer_instance.info.name
+            if not group_name:
+                continue  # pragma: no cover
+
             found = False
-            for idx, old in enumerate(self.registered_commands):
-                old_name = old.name or old.callback.__name__  # type: ignore[union-attr]
-                cmd_name = cmd.name or cmd.callback.__name__  # type: ignore[union-attr]
-                if old_name == cmd_name:
-                    self.registered_commands[idx] = cmd
-                    found = True
-                    break
-
-            if not found:
-                self.registered_commands.append(cmd)
-
-        for group in cli.registered_groups:
-            group_name = get_group_name(group) or group.name
-            if group_name is None:
-                continue
-
-            found = False
-            for idx, old in enumerate(self.registered_groups):  # type: ignore[assignment]
-                old_name = get_group_name(old) or group.name  # type: ignore[arg-type]
-                if old_name == group_name:
+            for idx, old in enumerate(self.registered_groups):
+                old_name = old.typer_instance.info.name
+                if old_name and old_name == group_name:
                     self.registered_groups[idx] = group
                     found = True
                     break
 
             if not found:
                 self.registered_groups.append(group)
+
+    def merge(self, cli: Union[Typer, Callable]):
+        if isinstance(cli, Typer):
+            self.merge_typer(cli)
+            for command in cli.registered_commands:
+                self.merge_command(command)
+        else:
+            self.merge_command(cli)

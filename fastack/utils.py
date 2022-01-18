@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Uni
 from fastapi.routing import APIRoute
 
 if TYPE_CHECKING:
-    from .app import Fastack
+    from .app import Fastack  # pragma: no cover
 
 from urllib.parse import urlencode, urlparse, urlunparse
 
@@ -29,7 +29,7 @@ def import_attr(module: str) -> Any:
     return getattr(mod, attr)
 
 
-def load_app() -> "Fastack":
+def load_app(raise_error: bool = True) -> "Fastack":
     """
     Load Fastack app from environment variable ``FASTACK_APP``.
     """
@@ -42,12 +42,13 @@ def load_app() -> "Fastack":
         return app
 
     except (ImportError, AttributeError) as e:
-        infoMsg = '\n  If you use the "fastack" command, you need to be in the root of the project directory '
-        infoMsg += "or set the location of the app via the environment:\n"
-        infoMsg += "    $ export FASTACK_APP=app.main.app\n"
-        infoMsg += "    $ fastack runserver\n\n"
-        infoMsg += "  I hope this helps!"
-        raise RuntimeError(infoMsg) from e
+        if raise_error:
+            infoMsg = '\n  If you use the "fastack" command, you need to be in the root of the project directory '
+            infoMsg += "or set the location of the app via the environment:\n"
+            infoMsg += "    $ export FASTACK_APP=app.main.app\n"
+            infoMsg += "    $ fastack runserver\n\n"
+            infoMsg += "  I hope this helps!"
+            raise RuntimeError(infoMsg) from e
 
 
 def lookup_exception_handler(
