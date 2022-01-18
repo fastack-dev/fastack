@@ -7,26 +7,27 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Type, Uni
 import anyio
 import click
 from asgi_lifespan import LifespanManager
-from fastapi import APIRouter, Response, params
+from fastapi import APIRouter, FastAPI, Response, params
 from fastapi.datastructures import Default, DefaultPlaceholder
 from fastapi.encoders import DictIntStrAny, SetIntStr
 from fastapi.responses import JSONResponse
 from starlette.routing import BaseRoute
 from starlette.types import ASGIApp
+from typer.core import TyperCommand
+from typer.models import CommandFunctionType, CommandInfo
 
 from .context import _app_ctx_stack
 from .utils import load_app
 
 
 def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
-    warnings.warn(
-        "with_asgi_lifespan is deprecated, use enable_context instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-
     @wraps(func)
     def executor(*args, **kwds):
+        warnings.warn(
+            "with_asgi_lifespan is deprecated, use enable_context instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         ctx = None
         for _, v in kwds.items():
             if isinstance(v, click.core.Context):
@@ -37,6 +38,7 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
             ctx, click.core.Context
         ), "with_asgi_lifespan decorator requires a context"
         app = ctx.obj
+        assert isinstance(app, FastAPI), "Invalid application type"
 
         async def wrapper() -> Any:
             token = None
@@ -44,7 +46,7 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
                 async with LifespanManager(app):
                     token = _app_ctx_stack.set(app)
                     if iscoroutinefunction(func):
-                        return await func(*args, **kwds)
+                        return await func(*args, **kwds)  # pragma: no cover
                     return func(*args, **kwds)
             finally:
                 if token:
@@ -79,7 +81,7 @@ def enable_context(
             ctx = None
             for _, v in kwargs.items():
                 # Finding Context in parameters
-                if isinstance(v, click.core.Context):
+                if isinstance(v, click.core.Context):  # pragma: no cover
                     ctx = v
                     break
 
@@ -87,11 +89,13 @@ def enable_context(
             if ctx is None:
                 app = load_app()
             else:
-                app = ctx.obj
+                # This is always a FastAPI object, below is just for checking.
+                app = ctx.obj  # pragma: no cover
+                if not isinstance(app, FastAPI):  # pragma: no cover
+                    app = load_app()
+                    ctx.obj = app
 
-            if ctx and not app:
-                # Put the app object into Context.obj if not exists
-                ctx.obj = app
+            assert isinstance(app, FastAPI), "Invalid application type"
 
             async def executor():
                 token = None
@@ -104,7 +108,7 @@ def enable_context(
                         if iscoroutinefunction(func):
                             rv = await func(*args, **kwargs)
                         else:
-                            rv = func(*args, **kwargs)
+                            rv = func(*args, **kwargs)  # pragma: no cover
 
                         if callable(finalizer):
                             finalizer(app, rv)
@@ -153,7 +157,7 @@ def route(
     name: Optional[str] = None,
     route_class_override: Optional[Type[APIRouter]] = None,
     callbacks: Optional[List[BaseRoute]] = None,
-    openapi_extra: Optional[Dict[str, Any]] = None
+    openapi_extra: Optional[Dict[str, Any]] = None,
 ):
     """
     A decorator to add additional information for endpoints in OpenAPI.
@@ -209,3 +213,41 @@ def route(
         return decorated
 
     return wrapper
+
+
+def command(
+    name: Optional[str] = None,
+    *,
+    cls: Optional[Type[click.Command]] = None,
+    context_settings: Optional[Dict[Any, Any]] = None,
+    help: Optional[str] = None,
+    epilog: Optional[str] = None,
+    short_help: Optional[str] = None,
+    options_metavar: str = "[OPTIONS]",
+    add_help_option: bool = True,
+    no_args_is_help: bool = False,
+    hidden: bool = False,
+    deprecated: bool = False,
+) -> Callable[[CommandFunctionType], CommandFunctionType]:
+    if cls is None:
+        cls = TyperCommand
+
+    def decorator(f: CommandFunctionType) -> CommandFunctionType:
+        # Inject command info here which will be used by fastack.cli.Command.merge
+        f.__command_info__ = CommandInfo(
+            name=name,
+            cls=cls,
+            context_settings=context_settings,
+            callback=f,
+            help=help,
+            epilog=epilog,
+            short_help=short_help,
+            options_metavar=options_metavar,
+            add_help_option=add_help_option,
+            no_args_is_help=no_args_is_help,
+            hidden=hidden,
+            deprecated=deprecated,
+        )
+        return f
+
+    return decorator

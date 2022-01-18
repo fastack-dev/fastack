@@ -51,6 +51,7 @@ tox = "^3.24.5"
 mypy = "^0.931"
 mkdocstrings = "^0.17.0"
 mkdocs-include-dir-to-nav = "^1.1.0"
+pytest-cov = "^3.0.0"
 
 [tool.poetry.scripts]
 

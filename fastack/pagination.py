@@ -8,11 +8,11 @@ class Pagination(metaclass=ABCMeta):
     """
 
     def __init__(self, *args, **kwds) -> None:
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def paginate(self, data: Sequence) -> Sequence:
-        pass
+        pass  # pragma: no cover
 
 
 class PageNumberPagination(Pagination):
