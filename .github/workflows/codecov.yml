@@ -15,10 +15,9 @@ jobs:
     - name: Generate coverage report
       run: |
         pip install poetry
-        poetry export --without-hashes -o requirements.txt --dev
-        pip install -e .
-        pip install -r requirements.txt
-        pytest --cov=fastack/ --cov-report=xml tests/
+        poetry config virtualenvs.create false
+        poetry install -vvv
+        pytest -sv --cov=fastack/ --cov-report=xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
