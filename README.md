@@ -7,13 +7,13 @@
     <em>⚡ Fastack makes your FastAPI much easier 😎</em>
 </p>
 <p align="center">
-<img alt="PyPI" src="https://img.shields.io/pypi/v/fastack?color=%23d3de37">
-<img alt="PyPI - Status" src="https://img.shields.io/pypi/status/fastack">
-<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/fastack?style=flat">
-<img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/fastack?style=flat">
-<img alt="PyPI - License" src="https://img.shields.io/pypi/l/fastack?color=%2328a682">
-<a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-<a href="https://gitter.im/fastack-dev/fastack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://badges.gitter.im/fastack-dev/fastack.svg"></a>
+    <img alt="PyPI" src="https://img.shields.io/pypi/v/fastack?color=%23d3de37">
+    <img alt="PyPI - Status" src="https://img.shields.io/pypi/status/fastack">
+    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/fastack?style=flat">
+    <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/fastack?style=flat">
+    <img alt="PyPI - License" src="https://img.shields.io/pypi/l/fastack?color=%2328a682">
+    <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+    <a href="https://results.pre-commit.ci/latest/github/fastack-dev/fastack/main"><img src="https://results.pre-commit.ci/badge/github/fastack-dev/fastack/main.svg"></a>
 </p>
 
 fastack is an intuitive framework based on FastAPI, for creating clean and easy-to-manage REST API project structures. It's built for FastAPI framework ❤️
