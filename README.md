@@ -13,6 +13,7 @@
 <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/fastack?style=flat">
 <img alt="PyPI - License" src="https://img.shields.io/pypi/l/fastack?color=%2328a682">
 <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<a href="https://results.pre-commit.ci/latest/github/fastack-dev/fastack/main"><img src="https://results.pre-commit.ci/badge/github/fastack-dev/fastack/main.svg"></a>
 </p>
 
 fastack is an intuitive framework based on FastAPI, for creating clean and easy-to-manage REST API project structures. It's built for FastAPI framework ❤️
