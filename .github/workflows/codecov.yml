@@ -17,7 +17,7 @@ jobs:
         pip install poetry
         poetry config virtualenvs.create false
         poetry install
-        pytest -sv --cov=fastack/ --cov-report=xml tests/
+        pytest --cov=fastack/ --cov-report=xml tests/
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
