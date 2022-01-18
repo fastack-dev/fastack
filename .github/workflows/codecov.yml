@@ -17,6 +17,7 @@ jobs:
         pip install poetry
         poetry install
         poetry run pytest -sv --cov=fastack/ --cov-report=xml tests/
+        exit
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
