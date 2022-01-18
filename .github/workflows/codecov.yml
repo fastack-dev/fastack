@@ -15,7 +15,7 @@ jobs:
     - name: Generate coverage report
       run: |
         pip install poetry
-        poetry export --without-hashes -o requirements.txt
+        poetry export --without-hashes -o requirements.txt --dev
         pip install -r requirements.txt
         pytest --cov=fastack/ --cov-report=xml tests/
 
