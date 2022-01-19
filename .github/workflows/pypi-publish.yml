@@ -5,15 +5,41 @@ name: Upload Python Package
 on:
   release:
     types: [created]
-  workflow_run:
-    workflows: ["Run Tests"]
-    types:
-      - completed
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  test:
+    name: Test v${{ matrix.py }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu
+          - windows
+          - macos
+        py:
+          - "3.9"
+          - "3.8"
+          - "3.7"
+    steps:
+      - name: Setup python v${{ matrix.py }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py }}
+      - uses: actions/checkout@v2
+      - name: Install poetry
+        run: |
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install -vvv
+
+      - name: Tests
+        run: pytest -v
+
   # This workflow contains a single job called "build"
   build:
+    needs: test
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
