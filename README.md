@@ -98,7 +98,3 @@ tox
 ```
 
 All components have not been fully tested, feel free if anyone wants to help make unit tests :)
-
-### Notes
-
-In my case, using python version `3.9` for testing caused it to hang. But all the tests went well, it just got stuck at the last part.
