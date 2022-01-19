@@ -7,13 +7,16 @@
     <em>⚡ Fastack makes your FastAPI much easier 😎</em>
 </p>
 <p align="center">
-    <img alt="PyPI" src="https://img.shields.io/pypi/v/fastack?color=%23d3de37">
-    <img alt="PyPI - Status" src="https://img.shields.io/pypi/status/fastack">
-    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/fastack?style=flat">
-    <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/fastack?style=flat">
-    <img alt="PyPI - License" src="https://img.shields.io/pypi/l/fastack?color=%2328a682">
-    <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-    <a href="https://results.pre-commit.ci/latest/github/fastack-dev/fastack/main"><img src="https://results.pre-commit.ci/badge/github/fastack-dev/fastack/main.svg"></a>
+<img alt="PyPI" src="https://img.shields.io/pypi/v/fastack?color=%23d3de37">
+<img alt="PyPI - Status" src="https://img.shields.io/pypi/status/fastack">
+<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/fastack?style=flat">
+<img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/fastack?style=flat">
+<img alt="PyPI - License" src="https://img.shields.io/pypi/l/fastack?color=%2328a682">
+<a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<a href="https://results.pre-commit.ci/latest/github/fastack-dev/fastack/main"><img src="https://results.pre-commit.ci/badge/github/fastack-dev/fastack/main.svg"></a>
+<a href="https://codecov.io/gh/fastack-dev/fastack">
+<img src="https://codecov.io/gh/fastack-dev/fastack/branch/main/graph/badge.svg?token=01EBPHVTKX"/>
+</a>
 </p>
 
 fastack is an intuitive framework based on FastAPI, for creating clean and easy-to-manage REST API project structures. It's built for FastAPI framework ❤️
@@ -24,8 +27,8 @@ This is an early development, lots of changes with each release. Also this is an
 
 FYI, this isn't the only intuitive framework project I've made. I've also made with different framework bases, including:
 
-* [zemfrog](https://github.com/zemfrog/zemfrog) - Based on [Flask framework](https://flask.palletsprojects.com) **Abandoned**
-* [falca](https://github.com/aprilahijriyan/falca) - Based on [Falcon framework](https://falconframework.org/) **Not maintained at this time**
+* [zemfrog](https://github.com/zemfrog/zemfrog) - Based on [Flask framework](https://flask.palletsprojects.com)
+* [falca](https://github.com/aprilahijriyan/falca) - Based on [Falcon framework](https://falconframework.org/)
 
 
 

@@ -1,13 +1,9 @@
-import nest_asyncio  # type: ignore[import] # noqa
-
-nest_asyncio.apply()
-
 from typing import List, Union
 
 import uvicorn  # type: ignore[import]
 from cookiecutter.main import cookiecutter  # type: ignore[import]
 from fastapi.routing import APIRoute, APIWebSocketRoute
-from typer import Argument, Option, echo
+from typer import Argument, Context, Option, echo
 
 from .cli import Command
 from .decorators import enable_context
@@ -25,14 +21,20 @@ fastack = Command(
 
 
 @fastack.command()
-@enable_context()
-def runserver(port: int = Option(2304, "-p", "--port", help="Port to run the server.")):
+def runserver(
+    ctx: Context,
+    port: int = Option(2304, "-p", "--port", help="Port to run the server."),
+):
     """
     Run app with uvicorn.
     """
 
-    app = current_app._get_current_object()
-    uvicorn.run(app, port=port, lifespan="on")
+    app = ctx.obj
+    if not app:
+        echo("Can't find app")
+        ctx.exit()
+
+    uvicorn.run(app, port=port, lifespan="on", debug=True)
 
 
 @fastack.command()

@@ -4,13 +4,26 @@ on: [push, pull_request]
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    name: Coverage test on ${{ matrix.os }} for python v${{ matrix.py }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu
+          - windows
+          - macos
+        py:
+          - "3.9"
+          - "3.8"
+          - "3.7"
+
     steps:
     - uses: actions/checkout@v2
-    - name: Setup Python
+    - name: Setup python v${{ matrix.py }}
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: ${{ matrix.py }}
 
     - name: Generate coverage report
       run: |
