@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   run:
-    name: Coverage test on ${{ matrix.os }}
+    name: Coverage test on ${{ matrix.os }} for python v${{ matrix.py }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false

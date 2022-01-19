@@ -5,7 +5,7 @@ on:
 
 jobs:
   test:
-    name: Test ${{ matrix.py }} - ${{ matrix.os }}
+    name: Test v${{ matrix.py }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
