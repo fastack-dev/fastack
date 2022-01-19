@@ -1,0 +1,34 @@
+name: Run Tests
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Test ${{ matrix.py }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu
+          - windows
+          - macos
+        py:
+          - "3.9"
+          - "3.8"
+          - "3.7"
+    steps:
+      - name: Setup python v${{ matrix.py }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py }}
+      - uses: actions/checkout@v2
+      - name: Install poetry
+        run: |
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install -vvv
+
+      - name: Tests
+        run: pytest -v
