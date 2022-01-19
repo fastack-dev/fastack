@@ -10,13 +10,14 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.8
 
     - name: Generate coverage report
       run: |
         pip install poetry
-        poetry install
-        poetry run pytest -sv --cov=fastack/ --cov-report=xml tests/
+        poetry config virtualenvs.create false
+        poetry install -vvv
+        pytest -v --cov=fastack/ --cov-report=xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
