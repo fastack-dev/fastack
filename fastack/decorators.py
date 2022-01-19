@@ -1,7 +1,6 @@
 import asyncio
 import warnings
 from functools import wraps
-from inspect import iscoroutinefunction
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Type, Union
 
 import anyio
@@ -45,7 +44,7 @@ def with_asgi_lifespan(func: Callable[..., Any]) -> Callable[..., Any]:
             try:
                 async with LifespanManager(app):
                     token = _app_ctx_stack.set(app)
-                    if iscoroutinefunction(func):
+                    if asyncio.iscoroutinefunction(func):
                         return await func(*args, **kwds)  # pragma: no cover
                     return func(*args, **kwds)
             finally:
@@ -105,7 +104,7 @@ def enable_context(
 
                     async with LifespanManager(app):
                         token = _app_ctx_stack.set(app)
-                        if iscoroutinefunction(func):
+                        if asyncio.iscoroutinefunction(func):
                             rv = await func(*args, **kwargs)
                         else:
                             rv = func(*args, **kwargs)  # pragma: no cover
@@ -167,7 +166,7 @@ def route(
     """
 
     def wrapper(func):
-        if iscoroutinefunction(func):
+        if asyncio.iscoroutinefunction(func):
 
             @wraps(func)
             async def decorated(*args, **kwds):
