@@ -34,7 +34,7 @@ def runserver(
         echo("Can't find app")
         ctx.exit()
 
-    uvicorn.run(app, port=port, lifespan="on", debug=True)
+    uvicorn.run(app, port=port, lifespan="on", debug=True)  # pragma: no cover
 
 
 @fastack.command()
@@ -77,4 +77,4 @@ def routes():
 
 
 if __name__ == "__main__":
-    fastack()
+    fastack()  # pragma: no cover

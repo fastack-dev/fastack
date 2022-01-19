@@ -3,7 +3,9 @@ from pydantic import BaseModel
 
 from fastack import Controller, ModelController
 from fastack.decorators import route
+from fastack.models import DetailModel, PaginatedModel
 
+from .models import UserModel
 from .plugin import say_hello
 
 
@@ -12,6 +14,7 @@ class UserBody(BaseModel):
 
 
 class UserController(ModelController):
+    @route(response_model=DetailModel[UserModel])
     def retrieve(self, id: int) -> Response:
         return self.json("User", {"id": id, "url": self.url_for("retrieve", id=id)})
 
@@ -24,11 +27,11 @@ class UserController(ModelController):
     def destroy(self, id: int) -> Response:
         return self.json("Deleted", {"id": id})
 
-    @route(name="list")
+    @route(name="list", response_model=PaginatedModel[UserModel])
     def list(
         self, page: int = Query(1, gt=0), page_size: int = Query(10, gt=0)
     ) -> Response:
-        data = [{"number": x, "url": self.url_for("list")} for x in range(1, 21)]
+        data = [{"id": x, "url": self.url_for("list")} for x in range(1, 21)]
         return self.get_paginated_response(data, page, page_size)
 
 
