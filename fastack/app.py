@@ -12,7 +12,7 @@ from starlette.routing import BaseRoute
 from starlette.types import ASGIApp, Receive, Scope, Send
 from typer import Typer
 
-from .context import _app_ctx_stack, _request_ctx_stack, _websocket_ctx_stack
+from .context import AppContext, _request_ctx_stack, _websocket_ctx_stack
 from .controller import Controller
 from .middleware import MiddlewareManager, StateMiddleware
 from .utils import import_attr
@@ -135,28 +135,29 @@ class Fastack(FastAPI):
     def middleware(self) -> MiddlewareManager:  # type: ignore[override]
         return MiddlewareManager(self)
 
+    def app_context(self, with_lifespan: bool = True):
+        return AppContext(self, with_lifespan=with_lifespan)
+
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         req_token: Optional[Token] = None
         ws_token: Optional[Token] = None
         try:
-            # Add the app instance to the global stack, so you can access it globally via ``fastack.globals.current_app``
-            app_token: Token = _app_ctx_stack.set(self)
-            scope_type = scope["type"]
-            # If the scope is http we will create a request instance object and add it to the global stack,
-            # so that it can be accessed via ``fastack.globals.request``
-            if scope_type == "http":
-                request = Request(scope, receive)
-                req_token = _request_ctx_stack.set(request)
+            async with self.app_context(with_lifespan=False):
+                scope_type = scope["type"]
+                # If the scope is http we will create a request instance object and add it to the global stack,
+                # so that it can be accessed via ``fastack.globals.request``
+                if scope_type == "http":
+                    request = Request(scope, receive)
+                    req_token = _request_ctx_stack.set(request)
 
-            # Same as above, but for websocket
-            elif scope_type == "websocket":
-                websocket = WebSocket(scope, receive, send)
-                ws_token = _websocket_ctx_stack.set(websocket)
+                # Same as above, but for websocket
+                elif scope_type == "websocket":
+                    websocket = WebSocket(scope, receive, send)
+                    ws_token = _websocket_ctx_stack.set(websocket)
 
-            await super().__call__(scope, receive, send)
+                await super().__call__(scope, receive, send)
         finally:
             # Clean global stack, when app finish processing request
-            _app_ctx_stack.reset(app_token)
             if req_token:
                 _request_ctx_stack.reset(req_token)
             if ws_token:

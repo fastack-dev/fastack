@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.1.0
     hooks:
     -   id: check-yaml
     -   id: end-of-file-fixer
@@ -15,7 +15,7 @@ repos:
         args: ["-r", "-i", "--remove-all-unused-imports", "--remove-unused-variables"]
 
 -   repo: https://github.com/pycqa/isort
-    rev: 5.8.0
+    rev: 5.10.1
     hooks:
     -   id: isort
         name: isort (python)
@@ -32,7 +32,7 @@ repos:
         exclude: ^templates/
 
 -   repo: https://github.com/psf/black
-    rev: 21.4b2
+    rev: 22.1.0
     hooks:
     -   id: black
         exclude: ^templates/

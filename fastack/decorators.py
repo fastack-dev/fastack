@@ -15,6 +15,7 @@ from starlette.types import ASGIApp
 from typer.core import TyperCommand
 from typer.models import CommandFunctionType, CommandInfo
 
+from .app import Fastack
 from .context import _app_ctx_stack
 from .utils import load_app
 
@@ -88,34 +89,28 @@ def enable_context(
             if ctx is None:
                 app = load_app()
             else:
-                # This is always a FastAPI object, below is just for checking.
+                # This is always a Fastack object, below is just for checking.
                 app = ctx.obj  # pragma: no cover
-                if not isinstance(app, FastAPI):  # pragma: no cover
+                if not isinstance(app, Fastack):  # pragma: no cover
                     app = load_app()
                     ctx.obj = app
 
-            assert isinstance(app, FastAPI), "Invalid application type"
+            assert isinstance(app, Fastack), "Invalid application type"
 
             async def executor():
-                token = None
-                try:
-                    if callable(initializer):
-                        initializer(app)
+                if callable(initializer):
+                    initializer(app)
 
-                    async with LifespanManager(app):
-                        token = _app_ctx_stack.set(app)
-                        if asyncio.iscoroutinefunction(func):
-                            rv = await func(*args, **kwargs)
-                        else:
-                            rv = func(*args, **kwargs)  # pragma: no cover
+                async with app.app_context():
+                    if asyncio.iscoroutinefunction(func):
+                        rv = await func(*args, **kwargs)
+                    else:
+                        rv = func(*args, **kwargs)  # pragma: no cover
 
-                        if callable(finalizer):
-                            finalizer(app, rv)
+                if callable(finalizer):
+                    finalizer(app, rv)
 
-                        return rv
-                finally:
-                    if token:
-                        _app_ctx_stack.reset(token)
+                return rv
 
             try:
                 loop = asyncio.get_running_loop()
