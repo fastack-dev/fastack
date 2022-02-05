@@ -8,7 +8,6 @@ from .base import (
     ProcessResponseFunc,
     ProcessWebSocketFunc,
 )
-from .state import StateMiddleware  # noqa
 
 if TYPE_CHECKING:
     from ..app import Fastack  # pragma: no cover

@@ -14,7 +14,7 @@ from typer import Typer
 
 from .context import AppContext, _request_ctx_stack, _websocket_ctx_stack
 from .controller import Controller
-from .middleware import MiddlewareManager, StateMiddleware
+from .middleware import MiddlewareManager
 from .utils import import_attr
 
 
@@ -243,7 +243,6 @@ def create_app(
         swagger_ui_parameters=swagger_ui_parameters,
         **extra,
     )
-    app.add_middleware(StateMiddleware)
     app.set_settings(settings)
     app.load_plugins()
     app.load_commands()
