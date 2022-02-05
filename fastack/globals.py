@@ -1,3 +1,4 @@
+from contextvars import ContextVar
 from typing import TYPE_CHECKING
 
 from fastapi import Request, WebSocket
@@ -10,16 +11,32 @@ if TYPE_CHECKING:
     from .app import Fastack  # pragma: no cover
 
 
+def _find_object(ctx: ContextVar, err: str):
+    try:
+        obj = ctx.get()
+        if not obj:  # pragma: no cover
+            raise LookupError
+    except LookupError:
+        raise RuntimeError(err)
+
+    return obj
+
+
 def _get_app() -> "Fastack":
-    app = _app_ctx_stack.get()
-    if not app:
-        raise RuntimeError("Working outside of application context.")
-    return app
+    return _find_object(_app_ctx_stack, "Working outside of application context.")
+
+
+def _get_request() -> "Fastack":
+    return _find_object(_request_ctx_stack, "Working outside of request context.")
+
+
+def _get_websocket() -> "Fastack":
+    return _find_object(_websocket_ctx_stack, "Working outside of websocket context.")
 
 
 current_app: "Fastack" = LocalProxy(_get_app)
-request: Request = LocalProxy(lambda: _request_ctx_stack.get())
-websocket: WebSocket = LocalProxy(lambda: _websocket_ctx_stack.get())
+request: Request = LocalProxy(_get_request)
+websocket: WebSocket = LocalProxy(_get_websocket)
 state: State = LocalProxy(lambda: current_app.state)
 
 
