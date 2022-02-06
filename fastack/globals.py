@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING
 
 from fastapi import Request, WebSocket
 from starlette.datastructures import State
-from werkzeug.local import LocalProxy
 
 from .context import _app_ctx_stack, _request_ctx_stack, _websocket_ctx_stack
+from .local import LocalProxy
 
 if TYPE_CHECKING:
     from .app import Fastack  # pragma: no cover
