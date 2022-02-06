@@ -56,6 +56,7 @@ class Controller:
         mapping_endpoints: Mapping to get default path.
         method_endpoints: Mapping to get default HTTP method.
         middlewares: List of middlewares (dependencies) to be applied to all routes.
+        json_response_class: Class to be used for JSON responses.
 
     """
 
@@ -64,6 +65,7 @@ class Controller:
     mapping_endpoints: Dict[str, str] = MAPPING_ENDPOINTS
     method_endpoints: Dict[str, str] = METHOD_ENDPOINTS
     middlewares: Optional[Sequence[params.Depends]] = []
+    json_response_class: Type[JSONResponse] = JSONResponse
 
     def get_endpoint_name(self) -> str:
         """
@@ -290,7 +292,9 @@ class Controller:
             data = self.serialize_data(data)
             content["data"] = jsonable_encoder(data)
 
-        return JSONResponse(content, status_code=status, headers=headers, **kwargs)
+        return self.json_response_class(
+            content, status_code=status, headers=headers, **kwargs
+        )
 
 
 class RetrieveController(Controller):
