@@ -29,17 +29,17 @@ def import_attr(module: str) -> Any:
     return getattr(mod, attr)
 
 
-def load_app(raise_error: bool = True) -> "Fastack":
+def load_app(raise_error: bool = True) -> Optional["Fastack"]:
     """
     Load Fastack app from environment variable ``FASTACK_APP``.
     """
 
     cwd = os.getcwd()
     sys.path.insert(0, cwd)
+    app = None
     try:
         src = os.environ.get("FASTACK_APP", "app.main.app")
-        app: "Fastack" = import_attr(src)
-        return app
+        app: "Fastack" = import_attr(src)  # type: ignore[no-redef]
 
     except (ImportError, AttributeError) as e:
         if raise_error:
@@ -49,6 +49,8 @@ def load_app(raise_error: bool = True) -> "Fastack":
             infoMsg += "    $ fastack runserver\n\n"
             infoMsg += "  I hope this helps!"
             raise RuntimeError(infoMsg) from e
+
+    return app
 
 
 def lookup_exception_handler(

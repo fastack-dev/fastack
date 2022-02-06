@@ -228,7 +228,7 @@ def command(
 
     def decorator(f: CommandFunctionType) -> CommandFunctionType:
         # Inject command info here which will be used by fastack.cli.Command.merge
-        f.__command_info__ = CommandInfo(
+        f.__command_info__ = CommandInfo(  # type: ignore[attr-defined]
             name=name,
             cls=cls,
             context_settings=context_settings,

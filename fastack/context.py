@@ -17,8 +17,8 @@ class AppContext:
     def __init__(self, app: "Fastack", *, with_lifespan: bool = False) -> None:
         self.app = app
         self.with_lifespan = with_lifespan
-        self._lm: LifespanManager = None
-        self._token: Token = None
+        self._lm: t.Optional[LifespanManager] = None
+        self._token: t.Optional[Token] = None
 
     def push(self):
         if self._token:
@@ -40,4 +40,4 @@ class AppContext:
     async def __aexit__(self, exc_type: type, exc_value: Exception, tb: TracebackType):
         self.pop()
         if self.with_lifespan:
-            await self._lm.__aexit__(exc_type, exc_value, tb)
+            await self._lm.__aexit__(exc_type, exc_value, tb)  # type: ignore[union-attr]

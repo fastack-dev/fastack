@@ -94,7 +94,7 @@ class Command(Typer):
             command_info = command
         else:
             cmd_name = name or command.__name__
-            command_info: Optional[CommandInfo] = getattr(
+            command_info: Optional[CommandInfo] = getattr(  # type: ignore[no-redef]
                 command, "__command_info__", None
             )
             if command_info is None:
@@ -112,7 +112,7 @@ class Command(Typer):
         for idx, old in enumerate(self.registered_commands):
             old_name = old.name
             if not old_name:
-                old_name = old.callback.__name__
+                old_name = getattr(old.callback, "__name__", None)
 
             if old_name and old_name == cmd_name:
                 self.registered_commands[idx] = command_info
@@ -124,13 +124,19 @@ class Command(Typer):
 
     def merge_typer(self, typer: Typer):
         for group in typer.registered_groups:
-            group_name = group.typer_instance.info.name
+            group_name = None
+            if group.typer_instance:
+                group_name = group.typer_instance.info.name
+
             if not group_name:
                 continue  # pragma: no cover
 
             found = False
             for idx, old in enumerate(self.registered_groups):
-                old_name = old.typer_instance.info.name
+                old_name = None
+                if old.typer_instance:
+                    old_name = old.typer_instance.info.name
+
                 if old_name and old_name == group_name:
                     self.registered_groups[idx] = group
                     found = True

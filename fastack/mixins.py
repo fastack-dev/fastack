@@ -25,7 +25,7 @@ class ListControllerMixin:
 
         results = []
         for o in data:
-            o = self.serialize_data(o)
+            o = self.serialize_data(o)  # type: ignore[attr-defined]
             o = jsonable_encoder(o)
             results.append(o)
 
