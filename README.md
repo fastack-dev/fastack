@@ -91,7 +91,7 @@ Or alternatively, you can visit https://fastack.readthedocs.io/en/latest/
 
 ## Tests 🔬
 
-Run tests with ``tox``, maybe you need to install python version `3.7`, `3.8` and `3.9` first.
+Run tests with ``tox``, maybe you need to install python version `3.7`, `3.8`, `3.9`, and `3.10` first.
 
 ```
 tox
