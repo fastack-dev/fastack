@@ -33,12 +33,10 @@ def sync_api_docs():
                 outfile = os.path.splitext(file)[0] + ".md"
                 py_module = filepath.replace(os.sep, ".").replace(".py", "")
                 with open(os.path.join(outdir, outfile), "w") as fp:
-                    content = textwrap.dedent(
-                        f"""\
+                    content = textwrap.dedent(f"""\
                     # {py_module}
                     ::: {py_module}
-                    """
-                    )
+                    """)
                     fp.write(content)
 
 
